@@ -80,6 +80,37 @@ function renderChart(containerId, dateLabel, data, maxY) {
     chartWrapper.style.display = 'block';
 
     new Chart(canvas.getContext('2d'), {
+        plugins: [{
+            id: 'barLabels',
+            afterDatasetsDraw(chart) {
+                const { ctx, data } = chart;
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold 12px Inter';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+
+                chart.getDatasetMeta(0).data.forEach((bar, index) => {
+                    const value = data.datasets[0].data[index];
+                    if (value === null || value === undefined) return;
+
+                    const formattedValue = value.toFixed(1);
+                    const { x, y, base } = bar;
+                    const height = base - y;
+
+                    // Only draw if bar is tall enough
+                    if (height > 40) {
+                        ctx.save();
+                        // Position near the top of the bar (15px padding)
+                        ctx.translate(x, y + 20);
+                        ctx.rotate(-Math.PI / 2);
+                        ctx.fillText(formattedValue, 0, 0);
+                        ctx.restore();
+                    }
+                });
+                ctx.restore();
+            }
+        }],
         data: {
             labels: labels,
             datasets: [
