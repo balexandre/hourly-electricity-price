@@ -4,6 +4,9 @@ const SUPPLIER_ID = 'cerius_c';
 const CUSTOMER_GROUP_ID = 'c';
 const AGGREGATION = '1h';
 
+const PRICE_THRESHOLD_LOW = 1.8;
+const PRICE_THRESHOLD_HIGH = 2.5;
+
 /**
  * Fetch prices for a specific date
  * @param {Date} date 
@@ -33,12 +36,23 @@ async function fetchPrices(date) {
     }
 }
 
+/**
+ * Get color based on price
+ * @param {number} price 
+ */
 function getColor(price) {
-    if (price < 1.8) return '#22c55e'; // Green
-    if (price < 2.5) return '#eab308'; // Yellow
+    if (price < PRICE_THRESHOLD_LOW) return '#22c55e'; // Green
+    if (price < PRICE_THRESHOLD_HIGH) return '#eab308'; // Yellow
     return '#ef4444'; // Red
 }
 
+/**
+ * Render chart
+ * @param {string} containerId 
+ * @param {string} dateLabel 
+ * @param {Object} data 
+ * @param {number} maxY 
+ */
 function renderChart(containerId, dateLabel, data, maxY) {
     const section = document.getElementById(containerId);
     const dateEl = section.querySelector('.current-date');
@@ -56,7 +70,7 @@ function renderChart(containerId, dateLabel, data, maxY) {
     const prices = data.prices;
     const labels = prices.map(p => {
         const date = new Date(p.date);
-        return date.getHours().toString().padStart(2, '0') + ':00';
+        return date.getHours().toString().padStart(2, '0') + 'h';
     });
     
     const values = prices.map(p => p.price.total);
@@ -76,29 +90,29 @@ function renderChart(containerId, dateLabel, data, maxY) {
                     backgroundColor: backgroundColors,
                     borderRadius: 8,
                     borderSkipped: false,
-                    order: 2
+                    order: 1
                 },
                 {
                     type: 'line',
                     label: 'Threshold 1.8',
-                    data: Array(labels.length).fill(1.8),
+                    data: Array(labels.length).fill(PRICE_THRESHOLD_LOW),
                     borderColor: '#22c55e',
                     borderWidth: 2,
                     borderDash: [5, 5],
                     pointRadius: 0,
                     fill: false,
-                    order: 1
+                    order: 2
                 },
                 {
                     type: 'line',
                     label: 'Threshold 2.5',
-                    data: Array(labels.length).fill(2.5),
+                    data: Array(labels.length).fill(PRICE_THRESHOLD_HIGH),
                     borderColor: '#eab308',
                     borderWidth: 2,
                     borderDash: [5, 5],
                     pointRadius: 0,
                     fill: false,
-                    order: 1
+                    order: 2
                 }
             ]
         },
