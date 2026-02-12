@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="boltGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#38bdf8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#818cf8;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <!-- Solid background for Apple compatibility -->
+  <rect width="512" height="512" fill="#0f172a" />
+  <circle cx="256" cy="256" r="220" fill="#1e293b" />
+  <path d="M300 60L140 320h100l-40 140 170-260h-110z" fill="url(#boltGradient)" filter="url(#glow)" />
+</svg>
