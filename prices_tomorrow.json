@@ -1,0 +1,1247 @@
+{
+	"priceArea": "DK2",
+	"supplier": {
+		"id": "cerius_c",
+		"name": "Cerius C",
+		"customerGroup": {
+			"id": "c",
+			"name": "C",
+			"description": "Privatkunder og mindre erhvervskunder"
+		}
+	},
+	"company": {
+		"id": "andel-energi",
+		"name": "Andel Energi",
+		"product": {
+			"id": "andel_energi_timeenergi",
+			"name": "TimeEnergi",
+			"productType": "variable"
+		}
+	},
+	"prices": [
+		{
+			"date": "2026-02-12T23:00:00.000Z",
+			"localDate": "2026-02-13T00:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.080626,
+				"vat": 0.270156,
+				"total": 1.350782,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 0.737083,
+					"vat": 0.184271,
+					"total": 0.921353,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.106463,
+					"vat": 0.026616,
+					"total": 0.133079,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T00:00:00.000Z",
+			"localDate": "2026-02-13T01:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.065761,
+				"vat": 0.26644,
+				"total": 1.332201,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 0.722218,
+					"vat": 0.180554,
+					"total": 0.902772,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.106463,
+					"vat": 0.026616,
+					"total": 0.133079,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T01:00:00.000Z",
+			"localDate": "2026-02-13T02:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.060065,
+				"vat": 0.265016,
+				"total": 1.325081,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 0.716522,
+					"vat": 0.17913,
+					"total": 0.895652,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.106463,
+					"vat": 0.026616,
+					"total": 0.133079,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T02:00:00.000Z",
+			"localDate": "2026-02-13T03:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.077712,
+				"vat": 0.269428,
+				"total": 1.34714,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 0.734169,
+					"vat": 0.183542,
+					"total": 0.917712,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.106463,
+					"vat": 0.026616,
+					"total": 0.133079,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T03:00:00.000Z",
+			"localDate": "2026-02-13T04:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.074967,
+				"vat": 0.268742,
+				"total": 1.343709,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 0.731424,
+					"vat": 0.182856,
+					"total": 0.91428,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.106463,
+					"vat": 0.026616,
+					"total": 0.133079,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T04:00:00.000Z",
+			"localDate": "2026-02-13T05:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.105593,
+				"vat": 0.276398,
+				"total": 1.381992,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 0.76205,
+					"vat": 0.190513,
+					"total": 0.952563,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.106463,
+					"vat": 0.026616,
+					"total": 0.133079,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T05:00:00.000Z",
+			"localDate": "2026-02-13T06:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.42431,
+				"vat": 0.356078,
+				"total": 1.780388,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 0.867841,
+					"vat": 0.21696,
+					"total": 1.084802,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T06:00:00.000Z",
+			"localDate": "2026-02-13T07:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.572044,
+				"vat": 0.393011,
+				"total": 1.965055,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.015575,
+					"vat": 0.253894,
+					"total": 1.269469,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T07:00:00.000Z",
+			"localDate": "2026-02-13T08:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.820266,
+				"vat": 0.455066,
+				"total": 2.275332,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.263797,
+					"vat": 0.315949,
+					"total": 1.579746,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T08:00:00.000Z",
+			"localDate": "2026-02-13T09:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.898773,
+				"vat": 0.474693,
+				"total": 2.373467,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.342304,
+					"vat": 0.335576,
+					"total": 1.67788,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T09:00:00.000Z",
+			"localDate": "2026-02-13T10:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.837876,
+				"vat": 0.459469,
+				"total": 2.297345,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.281407,
+					"vat": 0.320352,
+					"total": 1.601759,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T10:00:00.000Z",
+			"localDate": "2026-02-13T11:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.757277,
+				"vat": 0.439319,
+				"total": 2.196596,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.200808,
+					"vat": 0.300202,
+					"total": 1.50101,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T11:00:00.000Z",
+			"localDate": "2026-02-13T12:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.771824,
+				"vat": 0.442956,
+				"total": 2.21478,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.215355,
+					"vat": 0.303839,
+					"total": 1.519194,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T12:00:00.000Z",
+			"localDate": "2026-02-13T13:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.691897,
+				"vat": 0.422974,
+				"total": 2.114872,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.135428,
+					"vat": 0.283857,
+					"total": 1.419285,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T13:00:00.000Z",
+			"localDate": "2026-02-13T14:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.640206,
+				"vat": 0.410052,
+				"total": 2.050258,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.083737,
+					"vat": 0.270934,
+					"total": 1.354672,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T14:00:00.000Z",
+			"localDate": "2026-02-13T15:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.689245,
+				"vat": 0.422311,
+				"total": 2.111557,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.132776,
+					"vat": 0.283194,
+					"total": 1.415971,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T15:00:00.000Z",
+			"localDate": "2026-02-13T16:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.863516,
+				"vat": 0.465879,
+				"total": 2.329395,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.307047,
+					"vat": 0.326762,
+					"total": 1.633809,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T16:00:00.000Z",
+			"localDate": "2026-02-13T17:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 2.646965,
+				"vat": 0.661741,
+				"total": 3.308707,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.451718,
+					"vat": 0.36293,
+					"total": 1.814648,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.958167,
+					"vat": 0.239542,
+					"total": 1.197709,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T17:00:00.000Z",
+			"localDate": "2026-02-13T18:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 2.522182,
+				"vat": 0.630546,
+				"total": 3.152728,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.326935,
+					"vat": 0.331734,
+					"total": 1.658669,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.958167,
+					"vat": 0.239542,
+					"total": 1.197709,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T18:00:00.000Z",
+			"localDate": "2026-02-13T19:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 2.302439,
+				"vat": 0.57561,
+				"total": 2.878049,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 1.107192,
+					"vat": 0.276798,
+					"total": 1.383991,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.958167,
+					"vat": 0.239542,
+					"total": 1.197709,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T19:00:00.000Z",
+			"localDate": "2026-02-13T20:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 2.171214,
+				"vat": 0.542803,
+				"total": 2.714017,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 0.975967,
+					"vat": 0.243992,
+					"total": 1.219958,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.958167,
+					"vat": 0.239542,
+					"total": 1.197709,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T20:00:00.000Z",
+			"localDate": "2026-02-13T21:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.457327,
+				"vat": 0.364332,
+				"total": 1.821659,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 0.900858,
+					"vat": 0.225214,
+					"total": 1.126072,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T21:00:00.000Z",
+			"localDate": "2026-02-13T22:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.399623,
+				"vat": 0.349906,
+				"total": 1.749528,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 0.843154,
+					"vat": 0.210788,
+					"total": 1.053942,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		},
+		{
+			"date": "2026-02-13T22:00:00.000Z",
+			"localDate": "2026-02-13T23:00:00",
+			"resolution": "1h",
+			"price": {
+				"value": 1.345747,
+				"vat": 0.336437,
+				"total": 1.682183,
+				"unit": "kr/kWh"
+			},
+			"details": {
+				"electricity": {
+					"value": 0.789278,
+					"vat": 0.197319,
+					"total": 0.986597,
+					"unit": "kr/kWh"
+				},
+				"surcharge": {
+					"value": 0.11408,
+					"vat": 0.02852,
+					"total": 0.1426,
+					"unit": "kr/kWh"
+				},
+				"transmission": {
+					"systemTariff": {
+						"value": 0.072,
+						"vat": 0.018,
+						"total": 0.09,
+						"unit": "kr/kWh"
+					},
+					"netTariff": {
+						"value": 0.043,
+						"vat": 0.01075,
+						"total": 0.05375,
+						"unit": "kr/kWh"
+					}
+				},
+				"electricityTax": {
+					"value": 0.008,
+					"vat": 0.002,
+					"total": 0.01,
+					"unit": "kr/kWh"
+				},
+				"distribution": {
+					"value": 0.319389,
+					"vat": 0.079847,
+					"total": 0.399236,
+					"unit": "kr/kWh"
+				}
+			}
+		}
+	]
+}

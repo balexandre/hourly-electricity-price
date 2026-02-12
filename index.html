@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electricity Prices Today</title>
+    <link href="https://cdn.jsdelivr.net/npm/lucide-static@0.563.0/font/lucide.min.css" rel="stylesheet">
+    <link href="./style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Electricity Prices*</h1>
+        </header>
+
+        <section id="today-section" class="price-section">
+            <h2 class="current-date subtitle">Fetching Today's data...</h2>
+            <div class="loading">
+                <div class="spinner"></div>
+                <p class="subtitle">Loading today's price data...</p>
+            </div>
+            <div class="chart-wrapper" style="display: none;">
+                <div class="chart-container">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <section id="tomorrow-section" class="price-section">
+            <h2 class="current-date subtitle">Fetching Tomorrow's data...</h2>
+            <div class="loading">
+                <div class="spinner"></div>
+                <p class="subtitle">Loading tomorrow's price data...</p>
+            </div>
+            <div class="chart-wrapper" style="display: none;">
+                <div class="chart-container">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p class="subtitle">
+                 *Andel Energi Timeenergi
+            </p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
