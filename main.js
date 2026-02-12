@@ -218,6 +218,6 @@ function formatDate(date) {
     
     const maxY = Math.ceil(maxPrice * 1.1 * 10) / 10; // 10% buffer, rounded up to 1 decimal
 
-    renderChart('today-section', `Prices for Today (${formatDate(today)})`, todayData, maxY);
-    renderChart('tomorrow-section', `Prices for Tomorrow (${formatDate(tomorrow)})`, tomorrowData, maxY);
+    renderChart('today-section', `Prices for Today\n${formatDate(today)}`, todayData, maxY);
+    renderChart('tomorrow-section', `Prices for Tomorrow\n${formatDate(tomorrow)}`, tomorrowData, maxY);
 })();
