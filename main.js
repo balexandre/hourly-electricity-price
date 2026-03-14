@@ -4,8 +4,8 @@ const SUPPLIER_ID = 'cerius_c';
 const CUSTOMER_GROUP_ID = 'c';
 const AGGREGATION = '1h';
 
-const PRICE_THRESHOLD_LOW = 1.8;
-const PRICE_THRESHOLD_HIGH = 2.5;
+const PRICE_THRESHOLD_LOW = 2.1;
+const PRICE_THRESHOLD_HIGH = 3.2;
 
 /**
  * Fetch prices for a specific date
