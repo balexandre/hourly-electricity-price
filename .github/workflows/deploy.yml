@@ -4,18 +4,15 @@ on:
   push:
     branches: ["master"]
   schedule:
-    # Cron is in UTC and often runs 5-30 min late. notify.mjs works out what is due in Copenhagen time,
-    # so extra or late runs never send twice.
-    - cron: '5 5 * * *'    # 07:05 Copenhagen in summer → today's overview
-    - cron: '5 6 * * *'    # 07:05 Copenhagen in winter → today's overview
-    - cron: '15 14 * * *'  # tomorrow's prices are out (published ~13:00) → tomorrow's overview
-    - cron: '15 16 * * *'  # retry, in case tomorrow's prices were late
+    # Hourly through the day: 05:10-21:10 UTC is 06:10-22:10 Copenhagen in winter, 07:10-23:10 in summer.
+    # Cron often runs 5-30 min late; notify.mjs works out what is due in Copenhagen time and never sends twice.
+    - cron: '10 5-21 * * *'
   workflow_dispatch:
     inputs:
       notify:
         description: Notification to send
         type: choice
-        options: [auto, today, tomorrow]
+        options: [auto, today, tomorrow, reminder]
         default: auto
 
 # Runs queue up instead of racing each other to push data/
@@ -29,7 +26,7 @@ jobs:
     permissions:
       contents: write
     outputs:
-      changed: ${{ steps.commit.outputs.changed }}
+      prices_changed: ${{ steps.commit.outputs.prices_changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,17 +55,20 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
+          # Only new prices need a redeploy; a sent-log update alone doesn't change the site
+          if ! git diff --cached --quiet -- data/prices.json; then
+            echo "prices_changed=true" >> "$GITHUB_OUTPUT"
+          fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m "Update prices"
+          git commit -m "Update data"
           git pull --rebase
           git push
-          echo "changed=true" >> "$GITHUB_OUTPUT"
 
   # Pushes made with GITHUB_TOKEN don't trigger other workflows, so deploy from here
   deploy:
     needs: update
-    if: ${{ !cancelled() && (github.event_name != 'schedule' || needs.update.outputs.changed == 'true') }}
+    if: ${{ !cancelled() && (github.event_name != 'schedule' || needs.update.outputs.prices_changed == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       pages: write

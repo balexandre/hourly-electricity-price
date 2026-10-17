@@ -234,3 +234,12 @@ function formatDate(date) {
     });
     document.getElementById('updated').innerText = `Updated ${updated}`;
 })();
+
+// Installed as an app, the page can sit in the background for hours. Reload when it comes back,
+// so it never shows yesterday as today or misses tomorrow's prices.
+const loadedAt = Date.now();
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && Date.now() - loadedAt > 10 * 60 * 1000) {
+        location.reload();
+    }
+});
