@@ -1,80 +1,85 @@
-const API_BASE = 'https://stromligning.dk/api/prices';
-const PRODUCT_ID = 'andel_energi_timeenergi';
-const SUPPLIER_ID = 'cerius_c';
-const CUSTOMER_GROUP_ID = 'c';
-const AGGREGATION = '1h';
+// Written by scripts/fetch-prices.mjs (GitHub Action, several times a day)
+const PRICES_URL = './data/prices.json';
 
-const PRICE_THRESHOLD_LOW = 2.1;
-const PRICE_THRESHOLD_HIGH = 3.2;
+const TIER_COLORS = {
+    green: '#22c55e',
+    yellow: '#eab308',
+    red: '#ef4444'
+};
 
 /**
- * Fetch prices for a specific date
- * @param {Date} date 
+ * Fetch prices.json, revalidating so a cached copy from yesterday isn't shown
  */
-async function fetchPrices(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    const from = `${year}-${month}-${day}T00:00:00`;
-    const to = `${year}-${month}-${day}T23:59:59`;
-
-    const url = `${API_BASE}?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&productId=${PRODUCT_ID}&supplierId=${SUPPLIER_ID}&customerGroupId=${CUSTOMER_GROUP_ID}&aggregation=${AGGREGATION}`;
-
+async function loadPrices() {
     try {
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data.error) {
-            return { error: data.error };
-        }
-        
-        return data;
+        const response = await fetch(PRICES_URL, { cache: 'no-cache' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
     } catch (error) {
-        console.error('Error fetching data:', error);
-        return { error: 'Failed to connect to API' };
+        console.error('Error loading prices:', error);
+        return null;
     }
 }
 
 /**
- * Get color based on price
- * @param {number} price 
+ * Today's date in Copenhagen as "2026-10-17", matching the dates in prices.json
  */
-function getColor(price) {
-    if (price < PRICE_THRESHOLD_LOW) return '#22c55e'; // Green
-    if (price < PRICE_THRESHOLD_HIGH) return '#eab308'; // Yellow
-    return '#ef4444'; // Red
+function copenhagenToday() {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Copenhagen', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    const get = (type) => parts.find(p => p.type === type).value;
+    return `${get('year')}-${get('month')}-${get('day')}`;
 }
 
 /**
- * Render chart
- * @param {string} containerId 
- * @param {string} dateLabel 
- * @param {Object} data 
- * @param {number} maxY 
+ * "2026-10-17" + 1 → "2026-10-18"
  */
-function renderChart(containerId, dateLabel, data, maxY) {
+function addDays(date, days) {
+    const d = new Date(`${date}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + days);
+    return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Show a message in place of the chart
+ * @param {string} containerId
+ * @param {string} dateLabel
+ * @param {string} message
+ * @param {string} className "info-message" or "error-message"
+ */
+function showMessage(containerId, dateLabel, message, className = 'info-message') {
+    const section = document.getElementById(containerId);
+    section.querySelector('.current-date').innerText = dateLabel;
+    section.querySelector('.loading').innerHTML = `<p class="${className}">${message}</p>`;
+}
+
+/**
+ * Render chart, or a message when there are no prices for that day
+ * @param {string} containerId
+ * @param {string} dateLabel
+ * @param {{ hour: number, price: number, tier: string }[]} hours
+ * @param {{ low: number, high: number }} thresholds
+ * @param {number} maxY
+ * @param {string} emptyMessage
+ */
+function renderChart(containerId, dateLabel, hours, thresholds, maxY, emptyMessage) {
+    if (hours.length === 0) {
+        showMessage(containerId, dateLabel, emptyMessage);
+        return;
+    }
+
     const section = document.getElementById(containerId);
     const dateEl = section.querySelector('.current-date');
     const loadingEl = section.querySelector('.loading');
     const chartWrapper = section.querySelector('.chart-wrapper');
     const canvas = section.querySelector('canvas');
-    
+
     dateEl.innerText = dateLabel;
 
-    if (data.error) {
-        loadingEl.innerHTML = `<p class="error-message">${data.error}</p>`;
-        return;
-    }
-
-    const prices = data.prices;
-    const labels = prices.map(p => {
-        const date = new Date(p.date);
-        return date.getHours().toString().padStart(2, '0') + 'h';
-    });
-    
-    const values = prices.map(p => p.price.total);
-    const backgroundColors = values.map(v => getColor(v));
+    const labels = hours.map(h => h.hour.toString().padStart(2, '0') + 'h');
+    const values = hours.map(h => h.price);
+    const backgroundColors = hours.map(h => TIER_COLORS[h.tier]);
 
     loadingEl.style.display = 'none';
     chartWrapper.style.display = 'block';
@@ -125,9 +130,9 @@ function renderChart(containerId, dateLabel, data, maxY) {
                 },
                 {
                     type: 'line',
-                    label: 'Threshold 1.8',
-                    data: Array(labels.length).fill(PRICE_THRESHOLD_LOW),
-                    borderColor: '#22c55e',
+                    label: `Threshold ${thresholds.low}`,
+                    data: Array(labels.length).fill(thresholds.low),
+                    borderColor: TIER_COLORS.green,
                     borderWidth: 2,
                     borderDash: [5, 5],
                     pointRadius: 0,
@@ -136,9 +141,9 @@ function renderChart(containerId, dateLabel, data, maxY) {
                 },
                 {
                     type: 'line',
-                    label: 'Threshold 2.5',
-                    data: Array(labels.length).fill(PRICE_THRESHOLD_HIGH),
-                    borderColor: '#eab308',
+                    label: `Threshold ${thresholds.high}`,
+                    data: Array(labels.length).fill(thresholds.high),
+                    borderColor: TIER_COLORS.yellow,
                     borderWidth: 2,
                     borderDash: [5, 5],
                     pointRadius: 0,
@@ -178,8 +183,8 @@ function renderChart(containerId, dateLabel, data, maxY) {
 }
 
 /**
- * Format date to "Feb 12th, 2026"
- * @param {Date} date 
+ * Format date to "Thursday, Feb 12th, 2026"
+ * @param {Date} date
  */
 function formatDate(date) {
     const weekday = date.toLocaleString('en-US', { weekday: 'long' });
@@ -197,27 +202,35 @@ function formatDate(date) {
 }
 
 (async () => {
-    const today = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
+    const today = copenhagenToday();
+    const tomorrow = addDays(today, 1);
+    const todayLabel = `Prices for Today\n${formatDate(new Date(`${today}T12:00:00`))}`;
+    const tomorrowLabel = `Prices for Tomorrow\n${formatDate(new Date(`${tomorrow}T12:00:00`))}`;
 
-    const [todayData, tomorrowData] = await Promise.all([
-        fetchPrices(today),
-        fetchPrices(tomorrow)
-    ]);
+    const data = await loadPrices();
 
-    // Calculate global Max Y for synchronized scales
-    let maxPrice = 3.0; // Default min max to show thresholds
-    
-    if (!todayData.error) {
-        maxPrice = Math.max(maxPrice, ...todayData.prices.map(p => p.price.total));
+    if (!data) {
+        showMessage('today-section', todayLabel, 'Could not load price data.', 'error-message');
+        showMessage('tomorrow-section', tomorrowLabel, 'Could not load price data.', 'error-message');
+        return;
     }
-    if (!tomorrowData.error) {
-        maxPrice = Math.max(maxPrice, ...tomorrowData.prices.map(p => p.price.total));
-    }
-    
+
+    // Look days up by date, not by key: after midnight, the file's "tomorrow" is our today
+    const hoursFor = (date) => [data.today, data.tomorrow].find(d => d?.date === date)?.hours ?? [];
+    const todayHours = hoursFor(today);
+    const tomorrowHours = hoursFor(tomorrow);
+
+    // Shared Y scale for both charts, always tall enough to show the thresholds
+    const maxPrice = Math.max(data.thresholds.high, ...todayHours.map(h => h.price), ...tomorrowHours.map(h => h.price));
     const maxY = Math.ceil(maxPrice * 1.1 * 10) / 10; // 10% buffer, rounded up to 1 decimal
 
-    renderChart('today-section', `Prices for Today\n${formatDate(today)}`, todayData, maxY);
-    renderChart('tomorrow-section', `Prices for Tomorrow\n${formatDate(tomorrow)}`, tomorrowData, maxY);
+    renderChart('today-section', todayLabel, todayHours, data.thresholds, maxY,
+        "Today's prices aren't available yet.");
+    renderChart('tomorrow-section', tomorrowLabel, tomorrowHours, data.thresholds, maxY,
+        "Tomorrow's prices are usually published around 13:00.");
+
+    const updated = new Date(data.updatedAt).toLocaleString('en-GB', {
+        timeZone: 'Europe/Copenhagen', weekday: 'short', hour: '2-digit', minute: '2-digit'
+    });
+    document.getElementById('updated').innerText = `Updated ${updated}`;
 })();
