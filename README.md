@@ -5,6 +5,7 @@ A clean, responsive web application to visualize hourly electricity prices for T
 ## Features
 
 - **Dual Charts**: Compare Today's prices with Tomorrow's prices side-by-side.
+- **Right Now**: Today's chart opens with the current price, its level and when it changes; past hours are dimmed and the current one is outlined. The page refreshes itself every hour.
 - **Synchronized Scaling**: Both charts share the same Y-axis scale for accurate visual comparison.
 - **Price Thresholds** (total price incl. tariffs and VAT):
   - Green below **2.1 DKK/kWh**.
