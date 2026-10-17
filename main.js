@@ -7,6 +7,15 @@ const TIER_COLORS = {
     red: '#ef4444'
 };
 
+const TIER_LABELS = {
+    green: 'Cheap',
+    yellow: 'Moderate',
+    red: 'Expensive'
+};
+
+// Hours that have already passed are drawn at this opacity (hex alpha, ~30%)
+const PAST_ALPHA = '4D';
+
 /**
  * Fetch prices.json, revalidating so a cached copy from yesterday isn't shown
  */
@@ -22,14 +31,22 @@ async function loadPrices() {
 }
 
 /**
- * Today's date in Copenhagen as "2026-10-17", matching the dates in prices.json
+ * Today's date ("2026-10-17", matching the dates in prices.json) and the current hour, in Copenhagen
  */
-function copenhagenToday() {
+function copenhagenNow() {
     const parts = new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'Europe/Copenhagen', year: 'numeric', month: '2-digit', day: '2-digit'
+        timeZone: 'Europe/Copenhagen', year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', hourCycle: 'h23'
     }).formatToParts(new Date());
     const get = (type) => parts.find(p => p.type === type).value;
-    return `${get('year')}-${get('month')}-${get('day')}`;
+    return {
+        date: `${get('year')}-${get('month')}-${get('day')}`,
+        hour: Number(get('hour'))
+    };
+}
+
+function pad(n) {
+    return String(n).padStart(2, '0');
 }
 
 /**
@@ -62,8 +79,9 @@ function showMessage(containerId, dateLabel, message, className = 'info-message'
  * @param {{ low: number, high: number }} thresholds
  * @param {number} maxY
  * @param {string} emptyMessage
+ * @param {number} currentIndex index of the current hour, or -1 when the chart isn't today's
  */
-function renderChart(containerId, dateLabel, hours, thresholds, maxY, emptyMessage) {
+function renderChart(containerId, dateLabel, hours, thresholds, maxY, emptyMessage, currentIndex = -1) {
     if (hours.length === 0) {
         showMessage(containerId, dateLabel, emptyMessage);
         return;
@@ -79,7 +97,9 @@ function renderChart(containerId, dateLabel, hours, thresholds, maxY, emptyMessa
 
     const labels = hours.map(h => h.hour.toString().padStart(2, '0') + 'h');
     const values = hours.map(h => h.price);
-    const backgroundColors = hours.map(h => TIER_COLORS[h.tier]);
+    const isPast = (index) => index < currentIndex;
+    const isNow = (index) => index === currentIndex;
+    const backgroundColors = hours.map((h, i) => TIER_COLORS[h.tier] + (isPast(i) ? PAST_ALPHA : ''));
 
     loadingEl.style.display = 'none';
     chartWrapper.style.display = 'block';
@@ -93,11 +113,12 @@ function renderChart(containerId, dateLabel, hours, thresholds, maxY, emptyMessa
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.font = 'bold 12px Inter';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
 
                 chart.getDatasetMeta(0).data.forEach((bar, index) => {
                     const value = data.datasets[0].data[index];
                     if (value === null || value === undefined) return;
+
+                    ctx.fillStyle = isPast(index) ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.9)';
 
                     const formattedValue = value.toFixed(1);
                     const { x, y, base } = bar;
@@ -124,6 +145,9 @@ function renderChart(containerId, dateLabel, hours, thresholds, maxY, emptyMessa
                     label: 'Price per kWh',
                     data: values,
                     backgroundColor: backgroundColors,
+                    // Outline the current hour
+                    borderColor: hours.map((h, i) => isNow(i) ? '#f8fafc' : 'transparent'),
+                    borderWidth: hours.map((h, i) => isNow(i) ? 2 : 0),
                     borderRadius: 8,
                     borderSkipped: false,
                     order: 1
@@ -175,11 +199,52 @@ function renderChart(containerId, dateLabel, hours, thresholds, maxY, emptyMessa
                 },
                 x: {
                     grid: { display: false },
-                    ticks: { color: '#94a3b8' }
+                    ticks: {
+                        // tick.value is the bar index (labels may be skipped on narrow screens)
+                        color: (ctx) => isNow(ctx.tick.value) ? '#f8fafc' : '#94a3b8',
+                        font: (ctx) => ({ weight: isNow(ctx.tick.value) ? 'bold' : 'normal' })
+                    }
                 }
             }
         }
     });
+}
+
+/**
+ * Fill the "Now" block above today's chart: current price, its level, and what's coming up
+ * @param {{ hour: number, price: number, tier: string }[]} hours
+ * @param {number} currentIndex
+ */
+function showNow(hours, currentIndex) {
+    const current = hours[currentIndex];
+    const el = document.querySelector('#today-section .now');
+
+    el.querySelector('.now-label').innerText = `Now, ${pad(current.hour)}:00–${pad(current.hour + 1)}:00`;
+    el.querySelector('.now-price').innerText = current.price.toFixed(2);
+
+    const tierEl = el.querySelector('.now-tier');
+    tierEl.dataset.tier = current.tier;
+    tierEl.innerText = TIER_LABELS[current.tier];
+
+    el.querySelector('.now-hint').innerText = upcomingHint(hours.slice(currentIndex));
+    el.hidden = false;
+}
+
+/**
+ * "Cheaper from 21:00" while it's expensive, otherwise when the next expensive period is
+ * @param {{ hour: number, tier: string }[]} hours the current hour and the rest of the day
+ */
+function upcomingHint(hours) {
+    if (hours[0].tier === 'red') {
+        const cheaper = hours.find(h => h.tier !== 'red');
+        return cheaper ? `Cheaper from ${pad(cheaper.hour)}:00` : 'Expensive for the rest of the day';
+    }
+
+    const start = hours.findIndex(h => h.tier === 'red');
+    if (start === -1) return 'No expensive hours left today';
+
+    const end = hours.slice(start).find(h => h.tier !== 'red');
+    return `Expensive ${pad(hours[start].hour)}:00–${end ? pad(end.hour) : '24'}:00`;
 }
 
 /**
@@ -202,7 +267,8 @@ function formatDate(date) {
 }
 
 (async () => {
-    const today = copenhagenToday();
+    const now = copenhagenNow();
+    const today = now.date;
     const tomorrow = addDays(today, 1);
     const todayLabel = `Prices for Today\n${formatDate(new Date(`${today}T12:00:00`))}`;
     const tomorrowLabel = `Prices for Tomorrow\n${formatDate(new Date(`${tomorrow}T12:00:00`))}`;
@@ -224,8 +290,10 @@ function formatDate(date) {
     const maxPrice = Math.max(data.thresholds.high, ...todayHours.map(h => h.price), ...tomorrowHours.map(h => h.price));
     const maxY = Math.ceil(maxPrice * 1.1 * 10) / 10; // 10% buffer, rounded up to 1 decimal
 
+    const currentIndex = todayHours.findIndex(h => h.hour === now.hour);
     renderChart('today-section', todayLabel, todayHours, data.thresholds, maxY,
-        "Today's prices aren't available yet.");
+        "Today's prices aren't available yet.", currentIndex);
+    if (currentIndex >= 0) showNow(todayHours, currentIndex);
     renderChart('tomorrow-section', tomorrowLabel, tomorrowHours, data.thresholds, maxY,
         "Tomorrow's prices are usually published around 13:00.");
 
@@ -235,9 +303,12 @@ function formatDate(date) {
     document.getElementById('updated').innerText = `Updated ${updated}`;
 })();
 
-// Installed as an app, the page can sit in the background for hours. Reload when it comes back,
-// so it never shows yesterday as today or misses tomorrow's prices.
+// Keep the page current: reload just after every full hour, so the "now" marker moves on while the
+// page stays open, and when an installed app comes back after 10+ minutes in the background
+// (it never shows yesterday as today or misses tomorrow's prices).
 const loadedAt = Date.now();
+const HOUR = 60 * 60 * 1000;
+setTimeout(() => location.reload(), HOUR - (loadedAt % HOUR) + 5000);
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible' && Date.now() - loadedAt > 10 * 60 * 1000) {
         location.reload();
