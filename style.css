@@ -85,6 +85,15 @@ h2.subtitle {
     text-align: center;
 }
 
+.info-message {
+    color: var(--text-secondary);
+    background: rgba(148, 163, 184, 0.08);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    text-align: center;
+}
+
 .chart-container {
     position: relative;
     height: 350px;
