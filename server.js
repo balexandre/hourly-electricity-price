@@ -13,6 +13,7 @@ const MIME_TYPES = {
   '.jpg': 'image/jpg',
   '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
+  '.webmanifest': 'application/manifest+json',
 };
 
 const server = http.createServer((req, res) => {
