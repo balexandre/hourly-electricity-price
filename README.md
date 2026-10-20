@@ -60,6 +60,14 @@ Up to 3.65 kr/kWh. Hold off on the dishwasher, laundry and dryer.
 
 Tapping the notification opens the chart.
 
+With [Tesla charging](#tesla-charging) set up, 🚙 marks the hours the car charges. Tomorrow's overview also says whether it charges this afternoon or tonight. The car is blue so it never looks like a price warning:
+
+```
+🚙 Car charges tonight 02:00–06:00 · avg 1.80 kr (this afternoon 2.40 kr)
+
+00 🟢🟢🚙🚙🚙🚙🟢🟡🟡🟡🟡🟡
+```
+
 ## Source Data
 
 Data is fetched from the [stromligning.dk API](https://stromligning.dk/api/docs) for the "Andel Energi Timeenergi" product. The product, supplier and color thresholds are set at the top of `scripts/fetch-prices.mjs`:
