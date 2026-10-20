@@ -37,9 +37,51 @@ jobs:
           node-version: 22
 
       - name: Fetch prices
+        id: fetch
         run: node scripts/fetch-prices.mjs
 
+      # Tesla's signing tool, built once and then restored from the cache
+      - name: Cache tesla-control
+        id: tesla-control
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/tesla-control
+          key: tesla-control-v0.4.1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/tesla-control-schedule-id.patch') }}
+
+      - name: Setup Go
+        if: ${{ steps.tesla-control.outputs.cache-hit != 'true' }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: false
+
+      # Patched, because upstream ignores the schedule ID and would add a new schedule on every switch
+      - name: Build tesla-control
+        if: ${{ steps.tesla-control.outputs.cache-hit != 'true' }}
+        env:
+          CGO_ENABLED: 0
+        run: |
+          git clone --depth 1 --branch v0.4.1 https://github.com/teslamotors/vehicle-command "$RUNNER_TEMP/vehicle-command"
+          cd "$RUNNER_TEMP/vehicle-command"
+          git apply "$GITHUB_WORKSPACE/.github/tesla-control-schedule-id.patch"
+          go build -o "$RUNNER_TEMP/tesla-control" ./cmd/tesla-control
+
+      # Before the notifications, so tomorrow's overview can say where the car charges
+      - name: Tesla afternoon charging
+        env:
+          TESLA_CLIENT_ID: ${{ secrets.TESLA_CLIENT_ID }}
+          TESLA_VIN: ${{ secrets.TESLA_VIN }}
+          TESLA_SCHEDULE_ID: ${{ secrets.TESLA_SCHEDULE_ID }}
+          TESLA_REFRESH_TOKEN: ${{ secrets.TESLA_REFRESH_TOKEN }}
+          TESLA_PRIVATE_KEY: ${{ secrets.TESLA_PRIVATE_KEY }}
+          TESLA_CONTROL: ${{ runner.temp }}/tesla-control
+          # Lets the script store Tesla's new single-use refresh token back into TESLA_REFRESH_TOKEN
+          GH_TOKEN: ${{ secrets.TESLA_GH_TOKEN }}
+        run: node scripts/tesla-charge.mjs
+
+      # Runs even if the car couldn't be reached, so the family still hears about prices
       - name: Notify family
+        if: ${{ !cancelled() && steps.fetch.outcome == 'success' }}
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           NOTIFY: ${{ inputs.notify || 'auto' }}
@@ -55,7 +97,7 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
-          # Only new prices need a redeploy; a sent-log update alone doesn't change the site
+          # Only new prices (and the charging plan in them) need a redeploy; a sent-log update alone doesn't change the site
           if ! git diff --cached --quiet -- data/prices.json; then
             echo "prices_changed=true" >> "$GITHUB_OUTPUT"
           fi

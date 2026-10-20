@@ -1,5 +1,7 @@
 // Written by scripts/fetch-prices.mjs (GitHub Action, several times a day)
 const PRICES_URL = './data/prices.json';
+// Blue so charging hours never look like a price warning, same as in the notifications
+const CAR_EMOJI = '🚙';
 
 const TIER_COLORS = {
     green: '#22c55e',
@@ -17,17 +19,50 @@ const TIER_LABELS = {
 const PAST_ALPHA = '4D';
 
 /**
- * Fetch prices.json, revalidating so a cached copy from yesterday isn't shown
+ * Fetch a data file, revalidating so a cached copy from yesterday isn't shown
  */
-async function loadPrices() {
+async function loadJson(url) {
     try {
-        const response = await fetch(PRICES_URL, { cache: 'no-cache' });
+        const response = await fetch(url, { cache: 'no-cache' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return await response.json();
     } catch (error) {
-        console.error('Error loading prices:', error);
+        console.error(`Error loading ${url}:`, error);
         return null;
     }
+}
+
+/**
+ * Hours the car charges on this date (planned in prices.json): always the night window, the afternoon only when it's cheaper
+ * @returns {Set<number>}
+ */
+function chargingHours(charging, date) {
+    const hours = new Set();
+    if (!charging) return hours;
+    const windows = [charging.night];
+    if (charging.decision?.date === date && charging.decision.charge) windows.push(charging.afternoon);
+    for (const { from, until } of windows) {
+        for (let hour = from; hour < until; hour++) hours.add(hour);
+    }
+    return hours;
+}
+
+/**
+ * The "Car charges 02:00–06:00" line under a chart
+ * @param {string} containerId
+ * @param {Set<number>} charging
+ */
+function showCharging(containerId, charging) {
+    if (charging.size === 0) return;
+    const ranges = [];
+    for (const hour of [...charging].sort((a, b) => a - b)) {
+        const last = ranges.at(-1);
+        if (last && last.end === hour) last.end = hour + 1;
+        else ranges.push({ start: hour, end: hour + 1 });
+    }
+    const el = document.querySelector(`#${containerId} .charging`);
+    el.innerText = `${CAR_EMOJI} Car charges ${ranges.map(r => `${pad(r.start)}:00–${pad(r.end)}:00`).join(' and ')}`;
+    el.hidden = false;
 }
 
 /**
@@ -80,8 +115,9 @@ function showMessage(containerId, dateLabel, message, className = 'info-message'
  * @param {number} maxY
  * @param {string} emptyMessage
  * @param {number} currentIndex index of the current hour, or -1 when the chart isn't today's
+ * @param {Set<number>} charging hours the car charges, marked with a car above the bar
  */
-function renderChart(containerId, dateLabel, hours, thresholds, maxY, emptyMessage, currentIndex = -1) {
+function renderChart(containerId, dateLabel, hours, thresholds, maxY, emptyMessage, currentIndex = -1, charging = new Set()) {
     if (hours.length === 0) {
         showMessage(containerId, dateLabel, emptyMessage);
         return;
@@ -123,6 +159,14 @@ function renderChart(containerId, dateLabel, hours, thresholds, maxY, emptyMessa
                     const formattedValue = value.toFixed(1);
                     const { x, y, base } = bar;
                     const height = base - y;
+
+                    if (charging.has(hours[index].hour)) {
+                        ctx.save();
+                        ctx.globalAlpha = isPast(index) ? 0.4 : 1;
+                        ctx.font = '12px sans-serif';
+                        ctx.fillText(CAR_EMOJI, x, y - 12);
+                        ctx.restore();
+                    }
 
                     // Only draw if bar is tall enough
                     if (height > 40) {
@@ -179,6 +223,8 @@ function renderChart(containerId, dateLabel, hours, thresholds, maxY, emptyMessa
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            // Room for the car above the tallest bar
+            layout: { padding: { top: charging.size > 0 ? 20 : 0 } },
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -273,7 +319,7 @@ function formatDate(date) {
     const todayLabel = `Prices for Today\n${formatDate(new Date(`${today}T12:00:00`))}`;
     const tomorrowLabel = `Prices for Tomorrow\n${formatDate(new Date(`${tomorrow}T12:00:00`))}`;
 
-    const data = await loadPrices();
+    const data = await loadJson(PRICES_URL);
 
     if (!data) {
         showMessage('today-section', todayLabel, 'Could not load price data.', 'error-message');
@@ -291,11 +337,15 @@ function formatDate(date) {
     const maxY = Math.ceil(maxPrice * 1.1 * 10) / 10; // 10% buffer, rounded up to 1 decimal
 
     const currentIndex = todayHours.findIndex(h => h.hour === now.hour);
+    const todayCharging = chargingHours(data.charging, today);
+    const tomorrowCharging = tomorrowHours.length > 0 ? chargingHours(data.charging, tomorrow) : new Set();
     renderChart('today-section', todayLabel, todayHours, data.thresholds, maxY,
-        "Today's prices aren't available yet.", currentIndex);
+        "Today's prices aren't available yet.", currentIndex, todayCharging);
     if (currentIndex >= 0) showNow(todayHours, currentIndex);
+    if (todayHours.length > 0) showCharging('today-section', todayCharging);
     renderChart('tomorrow-section', tomorrowLabel, tomorrowHours, data.thresholds, maxY,
-        "Tomorrow's prices are usually published around 13:00.");
+        "Tomorrow's prices are usually published around 13:00.", -1, tomorrowCharging);
+    showCharging('tomorrow-section', tomorrowCharging);
 
     const updated = new Date(data.updatedAt).toLocaleString('en-GB', {
         timeZone: 'Europe/Copenhagen', weekday: 'short', hour: '2-digit', minute: '2-digit'
