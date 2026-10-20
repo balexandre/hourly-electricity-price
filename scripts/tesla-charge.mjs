@@ -1,10 +1,9 @@
-// Turns the Tesla's afternoon charge schedule on or off, so it only charges in the afternoon
-// when that's cheaper than the night that follows. The night schedule (02–06) is never touched.
+// Turns the Tesla's afternoon charge schedule on or off, following the charging plan that
+// fetch-prices.mjs writes into prices.json (see charging.mjs). The night schedule (02–06) is never touched.
 //   - outside the afternoon window the afternoon schedule is off
-//   - once tomorrow's prices are published, it's switched on for the rest of the afternoon
-//     if those hours are cheaper on average than tomorrow's 02–06
+//   - inside it, the schedule is on once today's plan says the afternoon is cheaper than the night
 //
-//   node scripts/tesla-charge.mjs          decide and update the car if needed (the workflow runs this hourly)
+//   node scripts/tesla-charge.mjs          follow the plan and update the car if needed (the workflow runs this hourly)
 //   node scripts/tesla-charge.mjs on|off   switch the afternoon schedule on or off right now
 //   add --dry-run to print the decision without contacting the car
 //
@@ -17,18 +16,16 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { copenhagenNow, addDays } from './time.mjs';
+import { copenhagenNow } from './time.mjs';
 import { requireEnv, refreshAccessToken, wakeUp, chargeSchedules, formatMinutes } from './tesla.mjs';
+import { AFTERNOON } from './charging.mjs';
 
 const PRICES_FILE = 'data/prices.json';
-// Remembers the day's decision and what the car was last set to; never holds secrets, it's committed
+// Remembers what the car was last set to and when the token was refreshed; never holds secrets, it's committed
 const STATE_FILE = 'data/charge.json';
 const LOCAL_TOKEN_FILE = '.tesla/token.json';
 const LOCAL_KEY_FILE = '.tesla/private-key.pem';
 
-// Copenhagen hours, matching the schedules set in the car
-const AFTERNOON = { from: 12, until: 17 };
-const NIGHT = { from: 2, until: 6 };
 // Refresh tokens expire after 3 months unused, so refresh at least this often even when idle
 const REFRESH_EVERY_DAYS = 7;
 
@@ -51,7 +48,7 @@ const data = JSON.parse(fs.readFileSync(PRICES_FILE, 'utf8'));
 const state = fs.existsSync(STATE_FILE) ? JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) : {};
 const now = copenhagenNow();
 
-const wanted = mode === 'auto' ? decide() : mode === 'on';
+const wanted = mode === 'auto' ? planned() : mode === 'on';
 console.log(`Afternoon charging: ${wanted ? 'on' : 'off'} (car was last set ${describe(state.enabled)}).`);
 
 const tokenIsOld = !state.tokenRefreshedAt
@@ -60,14 +57,12 @@ const tokenIsOld = !state.tokenRefreshedAt
 if (dryRun) {
     console.log(wanted === state.enabled && mode === 'auto' ? 'Nothing to change.' : 'Would update the car.');
 } else {
-    // Saved even when the car can't be reached, so the next run keeps today's decision and retries it
+    // Saved even when the car can't be reached, so a token refreshed before the failure is remembered
     try {
         if (wanted !== state.enabled || mode !== 'auto') {
             const accessToken = await accessTokenFor();
             await setAfternoonSchedule(accessToken, wanted);
             state.enabled = wanted;
-            // Only now is the car really charging this afternoon, which the notifications and site rely on
-            if (wanted && state.decision?.date === now.date) state.decision.switchedOn = true;
         } else if (tokenIsOld) {
             await accessTokenFor();
             console.log('Refreshed the Tesla token to keep it from expiring.');
@@ -77,50 +72,13 @@ if (dryRun) {
     }
 }
 
-/** Whether the afternoon schedule should be on right now, remembering the day's decision */
-function decide() {
+/** Whether the plan in prices.json has the afternoon schedule on right now */
+function planned() {
     if (now.hour < AFTERNOON.from || now.hour >= AFTERNOON.until) return false;
-    if (state.decision?.date === now.date) return state.decision.charge;
-
-    // Tomorrow's prices arrive around 13:00; until then there's nothing to compare with
-    const today = findDay(now.date);
-    const tomorrow = findDay(addDays(now.date, 1));
-    // The current hour counts only for the minutes left in it
-    const afternoon = average(today, AFTERNOON.from, AFTERNOON.until, now);
-    const night = average(tomorrow, NIGHT.from, NIGHT.until);
-    if (afternoon === null || night === null) return false;
-
-    const charge = afternoon < night;
-    state.decision = { date: now.date, charge, afternoon: round(afternoon), night: round(night) };
-    console.log(`Rest of the afternoon ${afternoon.toFixed(2)} kr/kWh, tomorrow's night ${night.toFixed(2)} kr/kWh.`);
-    return charge;
-}
-
-function findDay(date) {
-    return [data.today, data.tomorrow].find(day => day?.date === date);
-}
-
-/**
- * Average price over [from, until), or null if the day's prices aren't all published yet.
- * Every hourly record counts, so the hour that's skipped or repeated when the clocks change is handled.
- * With `since` ({ hour, minute }), only the time from then on counts.
- */
-function average(day, from, until, since = { hour: 0, minute: 0 }) {
-    // A day has 23–25 hourly prices; fewer means it's still incomplete
-    if (!day || day.hours.length < 23) return null;
-    let total = 0;
-    let weight = 0;
-    for (const { hour, price } of day.hours) {
-        if (hour < from || hour >= until || hour < since.hour) continue;
-        const share = hour === since.hour ? (60 - since.minute) / 60 : 1;
-        total += price * share;
-        weight += share;
-    }
-    return weight > 0 ? total / weight : null;
-}
-
-function round(price) {
-    return Math.round(price * 1000) / 1000;
+    const decision = data.charging?.decision;
+    if (decision?.date !== now.date) return false;
+    console.log(`Today's plan: afternoon ${decision.afternoon.toFixed(2)} kr/kWh, tomorrow's night ${decision.night.toFixed(2)} kr/kWh.`);
+    return decision.charge;
 }
 
 function describe(enabled) {
@@ -202,7 +160,5 @@ function days(mask) {
 }
 
 function save() {
-    // notify.mjs reads these to mark the charging hours in the family notifications
-    state.windows = { night: NIGHT, afternoon: AFTERNOON };
     fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + '\n');
 }

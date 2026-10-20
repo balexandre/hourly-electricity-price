@@ -97,8 +97,8 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
-          # Only new prices or charging hours need a redeploy; a sent-log update alone doesn't change the site
-          if ! git diff --cached --quiet -- data/prices.json data/charge.json; then
+          # Only new prices (and the charging plan in them) need a redeploy; a sent-log update alone doesn't change the site
+          if ! git diff --cached --quiet -- data/prices.json; then
             echo "prices_changed=true" >> "$GITHUB_OUTPUT"
           fi
           git config user.name 'github-actions[bot]'

@@ -21,12 +21,12 @@ A clean, responsive web application to visualize hourly electricity prices for T
 GitHub Action (.github/workflows/deploy.yml)
    runs hourly through the day (05:10–21:10 UTC), plus on every push
    │
-   ├─► 1. scripts/fetch-prices.mjs   fetches today + tomorrow from stromligning.dk
-   │                                 → data/prices.json
-   ├─► 2. scripts/notify.mjs         sends whatever notification is due → ntfy
+   ├─► 1. scripts/fetch-prices.mjs   fetches today + tomorrow from stromligning.dk and plans
+   │                                 when the car charges → data/prices.json
+   ├─► 2. scripts/tesla-charge.mjs   switches the car's afternoon charge schedule to match the plan
+   │                                 (remembers what the car was set to in data/charge.json)
+   ├─► 3. scripts/notify.mjs         sends whatever notification is due → ntfy
    │                                 (remembers what it sent in data/notified.json)
-   ├─► 3. scripts/tesla-charge.mjs   switches the car's afternoon charge schedule on or off
-   │                                 (remembers the day's decision in data/charge.json)
    ├─► 4. commits data/ back to the repo (only when something changed)
    └─► 5. deploys the site to GitHub Pages
 ```
@@ -60,7 +60,7 @@ Up to 3.65 kr/kWh. Hold off on the dishwasher, laundry and dryer.
 
 Tapping the notification opens the chart.
 
-With [Tesla charging](#tesla-charging) set up, 🚙 marks the hours the car charges, both in the notifications and above the bars on the site (read from `data/charge.json`). Tomorrow's overview also says whether it charges this afternoon or tonight. The car is blue so it never looks like a price warning:
+With [Tesla charging](#tesla-charging) set up, 🚙 marks the hours the car charges, both in the notifications and above the bars on the site (from the plan in `data/prices.json`). Tomorrow's overview also says whether it charges this afternoon or tonight. The car is blue so it never looks like a price warning:
 
 ```
 🚙 Car charges tonight 02:00–06:00 · avg 1.80 kr (this afternoon 2.40 kr)
@@ -104,10 +104,10 @@ The workflow commits `data/` a few times a day, so `git pull --rebase` before pu
 The car has two charge schedules: 02:00–06:00, which is always on, and 12:00–17:00, which this repo turns on and off.
 
 - The afternoon schedule is **off by default**, so the car waits for the night.
-- When tomorrow's prices are published (~13:00), it compares the rest of the afternoon with tomorrow's 02:00–06:00. If the afternoon is cheaper on average, it switches the schedule **on** until 17:00.
+- When tomorrow's prices are published (~13:00), `fetch-prices.mjs` compares the rest of the afternoon with tomorrow's 02:00–06:00 and writes the day's decision into `data/prices.json` as `charging`. The Tesla step, the notifications and the chart all read that one plan. If the afternoon is cheaper on average, the schedule goes **on** until 17:00.
 - After 17:00 it switches it back off.
 
-The car is only woken when the schedule actually has to change, about twice on an "afternoon" day and not at all otherwise. Tesla bills this well inside its $10 monthly free credit. The windows are set at the top of `scripts/tesla-charge.mjs`. If you change the times in the car, change them there too.
+The car is only woken when the schedule actually has to change, about twice on an "afternoon" day and not at all otherwise. Tesla bills this well inside its $10 monthly free credit. The windows are set at the top of `scripts/charging.mjs`. If you change the times in the car, change them there too.
 
 Tesla only accepts signed commands from cars made since 2021, so the workflow builds Tesla's [`tesla-control`](https://github.com/teslamotors/vehicle-command) and signs them with a private key. The car trusts the matching public key, which is hosted at `https://balexandre.github.io/.well-known/appspecific/com.tesla.3p.public-key.pem` (from the `balexandre.github.io` repo).
 

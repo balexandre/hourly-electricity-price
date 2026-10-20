@@ -1,7 +1,5 @@
 // Written by scripts/fetch-prices.mjs (GitHub Action, several times a day)
 const PRICES_URL = './data/prices.json';
-// Written by scripts/tesla-charge.mjs; missing when the Tesla isn't set up
-const CHARGE_URL = './data/charge.json';
 // Blue so charging hours never look like a price warning, same as in the notifications
 const CAR_EMOJI = '🚙';
 
@@ -35,14 +33,14 @@ async function loadJson(url) {
 }
 
 /**
- * Hours the car charges on this date: always the night window, the afternoon only once it's been switched on
+ * Hours the car charges on this date (planned in prices.json): always the night window, the afternoon only when it's cheaper
  * @returns {Set<number>}
  */
-function chargingHours(charge, date) {
+function chargingHours(charging, date) {
     const hours = new Set();
-    if (!charge?.windows) return hours;
-    const windows = [charge.windows.night];
-    if (charge.decision?.date === date && charge.decision.switchedOn) windows.push(charge.windows.afternoon);
+    if (!charging) return hours;
+    const windows = [charging.night];
+    if (charging.decision?.date === date && charging.decision.charge) windows.push(charging.afternoon);
     for (const { from, until } of windows) {
         for (let hour = from; hour < until; hour++) hours.add(hour);
     }
@@ -321,7 +319,7 @@ function formatDate(date) {
     const todayLabel = `Prices for Today\n${formatDate(new Date(`${today}T12:00:00`))}`;
     const tomorrowLabel = `Prices for Tomorrow\n${formatDate(new Date(`${tomorrow}T12:00:00`))}`;
 
-    const [data, charge] = await Promise.all([loadJson(PRICES_URL), loadJson(CHARGE_URL)]);
+    const data = await loadJson(PRICES_URL);
 
     if (!data) {
         showMessage('today-section', todayLabel, 'Could not load price data.', 'error-message');
@@ -339,8 +337,8 @@ function formatDate(date) {
     const maxY = Math.ceil(maxPrice * 1.1 * 10) / 10; // 10% buffer, rounded up to 1 decimal
 
     const currentIndex = todayHours.findIndex(h => h.hour === now.hour);
-    const todayCharging = chargingHours(charge, today);
-    const tomorrowCharging = tomorrowHours.length > 0 ? chargingHours(charge, tomorrow) : new Set();
+    const todayCharging = chargingHours(data.charging, today);
+    const tomorrowCharging = tomorrowHours.length > 0 ? chargingHours(data.charging, tomorrow) : new Set();
     renderChart('today-section', todayLabel, todayHours, data.thresholds, maxY,
         "Today's prices aren't available yet.", currentIndex, todayCharging);
     if (currentIndex >= 0) showNow(todayHours, currentIndex);

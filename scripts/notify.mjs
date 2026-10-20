@@ -16,8 +16,6 @@ import { copenhagenNow, addDays } from './time.mjs';
 const PRICES_FILE = 'data/prices.json';
 // Remembers what was last sent, so hourly runs never send the same thing twice
 const SENT_FILE = 'data/notified.json';
-// The Tesla's charge windows and the day's afternoon decision, written by tesla-charge.mjs
-const CHARGE_FILE = 'data/charge.json';
 const SITE_URL = 'https://balexandre.github.io/hourly-electricity-price/';
 
 // Today's overview goes out on the first run in this window (Copenhagen time)
@@ -45,7 +43,8 @@ if (!['auto', 'today', 'tomorrow', 'reminder'].includes(mode)) {
 
 const data = JSON.parse(fs.readFileSync(PRICES_FILE, 'utf8'));
 const sent = fs.existsSync(SENT_FILE) ? JSON.parse(fs.readFileSync(SENT_FILE, 'utf8')) : {};
-const charge = fs.existsSync(CHARGE_FILE) ? JSON.parse(fs.readFileSync(CHARGE_FILE, 'utf8')) : null;
+// The car's charge windows and today's afternoon decision, planned by fetch-prices.mjs
+const charging = data.charging;
 const now = copenhagenNow();
 
 // Days are looked up by date, not by key, so a file fetched yesterday afternoon still works this morning
@@ -126,11 +125,11 @@ function overview(which, day, fromHour) {
     if (car) lines.push(car);
 
     // Whole day as two rows of colored dots, each row labelled with its first hour; the car marks charging hours
-    const charging = chargingHours(day.date);
+    const carHours = chargingHours(day.date);
     const half = Math.ceil(day.hours.length / 2);
     lines.push('');
     for (const row of [day.hours.slice(0, half), day.hours.slice(half)]) {
-        lines.push(`${pad(row[0].hour)} ${row.map(h => charging.has(h.hour) ? CAR_EMOJI : TIER_EMOJI[h.tier]).join('')}`);
+        lines.push(`${pad(row[0].hour)} ${row.map(h => carHours.has(h.hour) ? CAR_EMOJI : TIER_EMOJI[h.tier]).join('')}`);
     }
 
     const weekday = new Date(`${day.date}T12:00:00Z`).toLocaleDateString('en-GB', {
@@ -169,12 +168,12 @@ function reminder(day, peak) {
     };
 }
 
-/** Hours the car charges on this date: always the night window, the afternoon only once it's been switched on */
+/** Hours the car charges on this date: always the night window, the afternoon only when it's cheaper */
 function chargingHours(date) {
     const hours = new Set();
-    if (!charge?.windows) return hours;
-    const windows = [charge.windows.night];
-    if (charge.decision?.date === date && charge.decision.switchedOn) windows.push(charge.windows.afternoon);
+    if (!charging) return hours;
+    const windows = [charging.night];
+    if (charging.decision?.date === date && charging.decision.charge) windows.push(charging.afternoon);
     for (const { from, until } of windows) {
         for (let hour = from; hour < until; hour++) hours.add(hour);
     }
@@ -186,11 +185,11 @@ function chargingHours(date) {
  * this afternoon if that's cheaper, otherwise tonight
  */
 function carLine(tomorrowDay) {
-    if (!charge?.windows) return null;
-    const { night, afternoon } = charge.windows;
-    const decision = charge.decision?.date === now.date ? charge.decision : null;
-    // Only while the car really has the afternoon schedule on; a late or retried overview says tonight
-    if (decision?.switchedOn && charge.enabled && now.hour < afternoon.until) {
+    if (!charging) return null;
+    const { night, afternoon } = charging;
+    const decision = charging.decision?.date === now.date ? charging.decision : null;
+    // Once the afternoon is over, a late or retried overview says tonight
+    if (decision?.charge && now.hour < afternoon.until) {
         return `${CAR_EMOJI} Car charges today until ${pad(afternoon.until)}:00 · avg ${decision.afternoon.toFixed(2)} kr (tonight ${decision.night.toFixed(2)} kr)`;
     }
     const tonight = tomorrowDay.hours.filter(h => h.hour >= night.from && h.hour < night.until);
