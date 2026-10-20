@@ -59,16 +59,23 @@ const tokenIsOld = !state.tokenRefreshedAt
 
 if (dryRun) {
     console.log(wanted === state.enabled && mode === 'auto' ? 'Nothing to change.' : 'Would update the car.');
-} else if (wanted !== state.enabled || mode !== 'auto') {
-    const accessToken = await accessTokenFor();
-    await setAfternoonSchedule(accessToken, wanted);
-    state.enabled = wanted;
-} else if (tokenIsOld) {
-    await accessTokenFor();
-    console.log('Refreshed the Tesla token to keep it from expiring.');
+} else {
+    // Saved even when the car can't be reached, so the next run keeps today's decision and retries it
+    try {
+        if (wanted !== state.enabled || mode !== 'auto') {
+            const accessToken = await accessTokenFor();
+            await setAfternoonSchedule(accessToken, wanted);
+            state.enabled = wanted;
+            // Only now is the car really charging this afternoon, which the notifications and site rely on
+            if (wanted && state.decision?.date === now.date) state.decision.switchedOn = true;
+        } else if (tokenIsOld) {
+            await accessTokenFor();
+            console.log('Refreshed the Tesla token to keep it from expiring.');
+        }
+    } finally {
+        save();
+    }
 }
-
-if (!dryRun) save();
 
 /** Whether the afternoon schedule should be on right now, remembering the day's decision */
 function decide() {
@@ -78,7 +85,8 @@ function decide() {
     // Tomorrow's prices arrive around 13:00; until then there's nothing to compare with
     const today = findDay(now.date);
     const tomorrow = findDay(addDays(now.date, 1));
-    const afternoon = average(today, Math.max(now.hour, AFTERNOON.from), AFTERNOON.until);
+    // The current hour counts only for the minutes left in it
+    const afternoon = average(today, AFTERNOON.from, AFTERNOON.until, now);
     const night = average(tomorrow, NIGHT.from, NIGHT.until);
     if (afternoon === null || night === null) return false;
 
@@ -92,11 +100,23 @@ function findDay(date) {
     return [data.today, data.tomorrow].find(day => day?.date === date);
 }
 
-/** Average price over [from, until), or null if any hour is missing */
-function average(day, from, until) {
-    const prices = (day?.hours ?? []).filter(h => h.hour >= from && h.hour < until).map(h => h.price);
-    if (prices.length !== until - from) return null;
-    return prices.reduce((sum, price) => sum + price, 0) / prices.length;
+/**
+ * Average price over [from, until), or null if the day's prices aren't all published yet.
+ * Every hourly record counts, so the hour that's skipped or repeated when the clocks change is handled.
+ * With `since` ({ hour, minute }), only the time from then on counts.
+ */
+function average(day, from, until, since = { hour: 0, minute: 0 }) {
+    // A day has 23–25 hourly prices; fewer means it's still incomplete
+    if (!day || day.hours.length < 23) return null;
+    let total = 0;
+    let weight = 0;
+    for (const { hour, price } of day.hours) {
+        if (hour < from || hour >= until || hour < since.hour) continue;
+        const share = hour === since.hour ? (60 - since.minute) / 60 : 1;
+        total += price * share;
+        weight += share;
+    }
+    return weight > 0 ? total / weight : null;
 }
 
 function round(price) {

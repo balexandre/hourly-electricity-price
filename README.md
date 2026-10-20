@@ -111,6 +111,8 @@ The car is only woken when the schedule actually has to change, about twice on a
 
 Tesla only accepts signed commands from cars made since 2021, so the workflow builds Tesla's [`tesla-control`](https://github.com/teslamotors/vehicle-command) and signs them with a private key. The car trusts the matching public key, which is hosted at `https://balexandre.github.io/.well-known/appspecific/com.tesla.3p.public-key.pem` (from the `balexandre.github.io` repo).
 
+The workflow patches `tesla-control` before building it (`.github/tesla-control-schedule-id.patch`). Without the patch it ignores the schedule ID and adds a new schedule on every switch, instead of switching the existing one.
+
 ### One-time setup
 
 These scripts need Node.js 20.12+.
@@ -124,6 +126,7 @@ These scripts need Node.js 20.12+.
    Put its `TESLA_CLIENT_ID` and `TESLA_SECRET` in `.env`.
 2. **Key**: generate a key pair into `.tesla/` (gitignored), and publish the public key at the URL above:
    ```bash
+   mkdir -p .tesla
    openssl ecparam -name prime256v1 -genkey -noout -out .tesla/private-key.pem
    openssl ec -in .tesla/private-key.pem -pubout -out .tesla/com.tesla.3p.public-key.pem
    ```

@@ -42,7 +42,7 @@ function chargingHours(charge, date) {
     const hours = new Set();
     if (!charge?.windows) return hours;
     const windows = [charge.windows.night];
-    if (charge.decision?.date === date && charge.decision.charge) windows.push(charge.windows.afternoon);
+    if (charge.decision?.date === date && charge.decision.switchedOn) windows.push(charge.windows.afternoon);
     for (const { from, until } of windows) {
         for (let hour = from; hour < until; hour++) hours.add(hour);
     }

@@ -46,7 +46,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/tesla-control
-          key: tesla-control-v0.4.1-${{ runner.os }}-${{ runner.arch }}
+          key: tesla-control-v0.4.1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/tesla-control-schedule-id.patch') }}
 
       - name: Setup Go
         if: ${{ steps.tesla-control.outputs.cache-hit != 'true' }}
@@ -55,6 +55,7 @@ jobs:
           go-version: '1.23'
           cache: false
 
+      # Patched, because upstream ignores the schedule ID and would add a new schedule on every switch
       - name: Build tesla-control
         if: ${{ steps.tesla-control.outputs.cache-hit != 'true' }}
         env:
@@ -62,6 +63,7 @@ jobs:
         run: |
           git clone --depth 1 --branch v0.4.1 https://github.com/teslamotors/vehicle-command "$RUNNER_TEMP/vehicle-command"
           cd "$RUNNER_TEMP/vehicle-command"
+          git apply "$GITHUB_WORKSPACE/.github/tesla-control-schedule-id.patch"
           go build -o "$RUNNER_TEMP/tesla-control" ./cmd/tesla-control
 
       # Before the notifications, so tomorrow's overview can say where the car charges

@@ -174,7 +174,7 @@ function chargingHours(date) {
     const hours = new Set();
     if (!charge?.windows) return hours;
     const windows = [charge.windows.night];
-    if (charge.decision?.date === date && charge.decision.charge) windows.push(charge.windows.afternoon);
+    if (charge.decision?.date === date && charge.decision.switchedOn) windows.push(charge.windows.afternoon);
     for (const { from, until } of windows) {
         for (let hour = from; hour < until; hour++) hours.add(hour);
     }
@@ -189,7 +189,8 @@ function carLine(tomorrowDay) {
     if (!charge?.windows) return null;
     const { night, afternoon } = charge.windows;
     const decision = charge.decision?.date === now.date ? charge.decision : null;
-    if (decision?.charge) {
+    // Only while the car really has the afternoon schedule on; a late or retried overview says tonight
+    if (decision?.switchedOn && charge.enabled && now.hour < afternoon.until) {
         return `${CAR_EMOJI} Car charges today until ${pad(afternoon.until)}:00 · avg ${decision.afternoon.toFixed(2)} kr (tonight ${decision.night.toFixed(2)} kr)`;
     }
     const tonight = tomorrowDay.hours.filter(h => h.hour >= night.from && h.hour < night.until);

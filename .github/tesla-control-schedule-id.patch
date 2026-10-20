@@ -1,0 +1,17 @@
+diff --git a/cmd/tesla-control/commands.go b/cmd/tesla-control/commands.go
+index 0b2322e..5815703 100644
+--- a/cmd/tesla-control/commands.go
++++ b/cmd/tesla-control/commands.go
+@@ -1070,6 +1070,12 @@ var commands = map[string]*Command{
+ 				Enabled: true,
+ 			}
+ 
++			if idStr, ok := args["ID"]; ok {
++				if schedule.Id, err = strconv.ParseUint(idStr, 10, 64); err != nil {
++					return errors.New("expected numeric ID")
++				}
++			}
++
+ 			if enabledStr, ok := args["ENABLED"]; ok {
+ 				schedule.Enabled = enabledStr == "true"
+ 			}
