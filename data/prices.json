@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-19T22:16:28.978Z",
+  "updatedAt": "2026-10-20T02:08:24.897Z",
   "product": "Andel Energi TimeEnergi",
   "priceArea": "DK2",
   "unit": "DKK/kWh",
@@ -135,5 +135,16 @@
   "tomorrow": {
     "date": "2026-10-21",
     "hours": []
+  },
+  "charging": {
+    "night": {
+      "from": 2,
+      "until": 6
+    },
+    "afternoon": {
+      "from": 12,
+      "until": 17
+    },
+    "decision": null
   }
 }
