@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-20T14:57:07.442Z",
+  "updatedAt": "2026-10-20T19:09:28.059Z",
   "product": "Andel Energi TimeEnergi",
   "priceArea": "DK2",
   "unit": "DKK/kWh",
@@ -32,17 +32,17 @@
       },
       {
         "hour": 4,
-        "price": 2.0033,
+        "price": 2.0032,
         "tier": "green"
       },
       {
         "hour": 5,
-        "price": 1.992,
+        "price": 1.9919,
         "tier": "green"
       },
       {
         "hour": 6,
-        "price": 2.4599,
+        "price": 2.4598,
         "tier": "yellow"
       },
       {
@@ -62,12 +62,12 @@
       },
       {
         "hour": 10,
-        "price": 2.4689,
+        "price": 2.4688,
         "tier": "yellow"
       },
       {
         "hour": 11,
-        "price": 2.2586,
+        "price": 2.2585,
         "tier": "yellow"
       },
       {
@@ -82,7 +82,7 @@
       },
       {
         "hour": 14,
-        "price": 2.1666,
+        "price": 2.1665,
         "tier": "yellow"
       },
       {
@@ -102,7 +102,7 @@
       },
       {
         "hour": 18,
-        "price": 3.9148,
+        "price": 3.9147,
         "tier": "red"
       },
       {
@@ -112,7 +112,7 @@
       },
       {
         "hour": 20,
-        "price": 3.7833,
+        "price": 3.7832,
         "tier": "red"
       },
       {
@@ -122,7 +122,7 @@
       },
       {
         "hour": 22,
-        "price": 2.635,
+        "price": 2.6349,
         "tier": "yellow"
       },
       {
