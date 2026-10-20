@@ -1,3 +1,13 @@
 {
-  "enabled": true
+  "enabled": true,
+  "windows": {
+    "night": {
+      "from": 2,
+      "until": 6
+    },
+    "afternoon": {
+      "from": 12,
+      "until": 17
+    }
+  }
 }

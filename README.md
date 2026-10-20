@@ -60,7 +60,7 @@ Up to 3.65 kr/kWh. Hold off on the dishwasher, laundry and dryer.
 
 Tapping the notification opens the chart.
 
-With [Tesla charging](#tesla-charging) set up, 🚙 marks the hours the car charges. Tomorrow's overview also says whether it charges this afternoon or tonight. The car is blue so it never looks like a price warning:
+With [Tesla charging](#tesla-charging) set up, 🚙 marks the hours the car charges, both in the notifications and above the bars on the site (read from `data/charge.json`). Tomorrow's overview also says whether it charges this afternoon or tonight. The car is blue so it never looks like a price warning:
 
 ```
 🚙 Car charges tonight 02:00–06:00 · avg 1.80 kr (this afternoon 2.40 kr)
