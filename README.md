@@ -10,38 +10,48 @@ A clean, responsive web application to visualize hourly electricity prices for T
 - **Price Thresholds** (total price incl. tariffs and VAT):
   - Green below **2.1 DKK/kWh**.
   - Yellow below **3.2 DKK/kWh**, red above.
-- **Push Notifications** via [ntfy](https://ntfy.sh): a reminder before expensive hours, plus quiet daily overviews.
+- **Push Notifications** via [ntfy](https://ntfy.sh): a warning an hour before each expensive period, plus a quiet overview of tomorrow at 15:00.
 - **Tesla Charging**: the car's afternoon charge schedule is only switched on when the afternoon is cheaper than the night after (optional).
 - **Responsive Design**: Glassmorphism UI that looks great on all devices.
 - **Installable**: "Add to Home Screen" opens it full-screen like an app, with its own icon.
 
 ## How it works
 
+The GitHub Action (`.github/workflows/deploy.yml`) does two jobs a day, plus a prices run on every push. All times are Copenhagen:
+
+![Daily schedule: a car run at 07:00 and a prices run around 13:15, which queues tomorrow's overview for 15:00 and a warning an hour before each expensive period tomorrow](docs/schedule.svg)
+
 ```
-GitHub Action (.github/workflows/deploy.yml)
-   runs hourly through the day (05:10–21:10 UTC), plus on every push
+Prices run, tried every 30 min from 13:15 to 15:45 (12:15 to 14:45 in winter); tomorrow's prices come out around 13:00
    │
    ├─► 1. scripts/fetch-prices.mjs   fetches today + tomorrow from stromligning.dk and plans
    │                                 when the car charges → data/prices.json
-   ├─► 2. scripts/tesla-charge.mjs   switches the car's afternoon charge schedule to match the plan
+   │                                 (once a day: skipped when tomorrow's prices are already there)
+   ├─► 2. scripts/tesla-charge.mjs   switches the car's afternoon charging on if it's cheaper than tonight
    │                                 (remembers what the car was set to in data/charge.json)
-   ├─► 3. scripts/notify.mjs         sends whatever notification is due → ntfy
-   │                                 (remembers what it sent in data/notified.json)
+   ├─► 3. scripts/notify.mjs         hands ntfy all of tomorrow's notifications, each with its delivery time
+   │                                 (remembers what it queued in data/notified.json)
    ├─► 4. commits data/ back to the repo (only when something changed)
    └─► 5. deploys the site to GitHub Pages
+
+Car run at 07:00 with a second try at 09:00 (06:00 and 08:00 in winter: GitHub's schedule is in UTC)
+   │
+   ├─► scripts/tesla-charge.mjs      switches the afternoon charging back off
+   └─► commits data/charge.json
 ```
+
+GitHub often starts scheduled runs late or skips them, so each job has a few tries. The first one that finds something to do does it, and the rest change nothing. Notifications don't depend on when a run starts: [ntfy holds each message](https://docs.ntfy.sh/publish/#scheduled-delivery) and delivers it at its time. Only tomorrow's overview can be late, if no prices run gets through before 15:00.
 
 The web page only reads `data/prices.json`; it never calls the price API itself.
 
-Notifications (all times Copenhagen):
+Notifications:
 
 | Notification | When | Sound |
 | --- | --- | --- |
-| **Expensive hours reminder** | Up to an hour before each red period, between 07:00 and 22:00 | 🔔 Buzzes |
-| **Tomorrow's prices** | As soon as they're published (~13:00–14:00) | 🔕 Silent |
-| **Today's prices** | First run after 07:00, only if there are red hours ahead | 🔕 Silent |
+| **Expensive hours warning** | An hour before each red period, moved to 07:00 if that's earlier (or to 21:00 if later) | 🔔 Buzzes |
+| **Tomorrow's prices** | 15:00, or as soon as they're out if that's later | 🔕 Silent |
 
-Only the reminder makes a sound, so a buzz always means "hold off now". The overviews just sit in the notification list.
+Only the warning makes a sound, so a buzz always means "hold off soon". The overview just sits in the notification list. A red period that's over before 07:00 gets no warning.
 
 ```
 ⚠️ Expensive electricity 17:00–21:00
@@ -82,7 +92,7 @@ const THRESHOLDS = { low: 2.1, high: 3.2 };
 
 1. **Secret**: in the repo, go to *Settings → Secrets and variables → Actions → New repository secret* and add `NTFY_TOPIC` with the ntfy topic name (or full topic URL). Anyone who knows the topic can read and send to it, so never commit it.
 2. **Phones**: install the ntfy app ([Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) / [iOS](https://apps.apple.com/app/ntfy/id1625396347)), tap **+** and subscribe to the same topic on `ntfy.sh`.
-3. **Test**: *Actions → Update prices & deploy → Run workflow*, and choose `today`, `tomorrow` or `reminder` to send one right away.
+3. **Test**: *Actions → Update prices & deploy → Run workflow*, and choose `tomorrow` or `reminder` to send one right away. Choose the `car` task to run the morning car switch.
 4. **Install** (optional): open the site on the phone, then *Share → Add to Home Screen* (iPhone) or *⋮ → Add to Home screen* (Android).
 
 ## Local Development
@@ -90,12 +100,14 @@ const THRESHOLDS = { low: 2.1, high: 3.2 };
 No dependencies or build step, just Node.js 18+.
 
 ```bash
-node scripts/fetch-prices.mjs      # refresh data/prices.json
-node scripts/notify.mjs --dry-run  # preview the notification that's due
+node scripts/fetch-prices.mjs      # refresh data/prices.json (add --force once tomorrow's are in)
+node scripts/notify.mjs --dry-run  # preview what would be queued, and when it'd arrive
 node scripts/notify.mjs tomorrow --dry-run
 node scripts/notify.mjs reminder --dry-run
 node ./server.js                   # http://localhost:3001
 ```
+
+The diagram is `docs/schedule.svg`, exported from `docs/schedule.html`.
 
 The workflow commits `data/` a few times a day, so `git pull --rebase` before pushing.
 
@@ -105,7 +117,7 @@ The car has two charge schedules: 02:00–06:00, which is always on, and 12:00�
 
 - The afternoon schedule is **off by default**, so the car waits for the night.
 - When tomorrow's prices are published (~13:00), `fetch-prices.mjs` compares the rest of the afternoon with tomorrow's 02:00–06:00 and writes the day's decision into `data/prices.json` as `charging`. The Tesla step, the notifications and the chart all read that one plan. If the afternoon is cheaper on average, the schedule goes **on** until 17:00.
-- After 17:00 it switches it back off.
+- The next morning's car run (07:00) switches it back off, before it would start again at 12:00.
 
 The car is only woken when the schedule actually has to change, about twice on an "afternoon" day and not at all otherwise. Tesla bills this well inside its $10 monthly free credit. The windows are set at the top of `scripts/charging.mjs`. If you change the times in the car, change them there too.
 

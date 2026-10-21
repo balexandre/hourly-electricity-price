@@ -3,16 +3,27 @@ name: Update prices & deploy
 on:
   push:
     branches: ["master"]
+  # GitHub often starts scheduled runs late or skips them, so each job gets several tries.
+  # Every step works out what's due in Copenhagen time, so the extra tries change nothing.
   schedule:
-    # Hourly through the day: 05:10-21:10 UTC is 06:10-22:10 Copenhagen in winter, 07:10-23:10 in summer.
-    # Cron often runs 5-30 min late; notify.mjs works out what is due in Copenhagen time and never sends twice.
-    - cron: '10 5-21 * * *'
+    # Prices: tomorrow's come out around 13:00. The first try that finds them switches the car on for a cheap
+    # afternoon and hands ntfy all of tomorrow's notifications; the rest find nothing new.
+    # 11:15-13:45 UTC is 12:15-14:45 Copenhagen in winter, 13:15-15:45 in summer.
+    - cron: '15,45 11-13 * * *'
+    # Car: switches the afternoon charging back off before it would start again at 12:00.
+    # 05:00 and 07:00 UTC is 06:00 and 08:00 Copenhagen in winter, 07:00 and 09:00 in summer.
+    - cron: '0 5,7 * * *'
   workflow_dispatch:
     inputs:
-      notify:
-        description: Notification to send
+      task:
+        description: What to run
         type: choice
-        options: [auto, today, tomorrow, reminder]
+        options: [prices, car]
+        default: prices
+      notify:
+        description: Notification to send (prices only)
+        type: choice
+        options: [auto, tomorrow, reminder]
         default: auto
 
 # Runs queue up instead of racing each other to push data/
@@ -25,6 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      # The morning run only touches the car; everything else is a prices run
+      TASK: ${{ github.event.schedule == '0 5,7 * * *' && 'car' || inputs.task || 'prices' }}
     outputs:
       prices_changed: ${{ steps.commit.outputs.prices_changed }}
     steps:
@@ -38,6 +52,7 @@ jobs:
 
       - name: Fetch prices
         id: fetch
+        if: ${{ env.TASK == 'prices' }}
         run: node scripts/fetch-prices.mjs
 
       # Tesla's signing tool, built once and then restored from the cache
@@ -66,7 +81,8 @@ jobs:
           git apply "$GITHUB_WORKSPACE/.github/tesla-control-schedule-id.patch"
           go build -o "$RUNNER_TEMP/tesla-control" ./cmd/tesla-control
 
-      # Before the notifications, so tomorrow's overview can say where the car charges
+      # Before the notifications, so tomorrow's overview can say where the car charges.
+      # On the morning run it switches the afternoon charging off, on a prices run on when the plan says so.
       - name: Tesla afternoon charging
         env:
           TESLA_CLIENT_ID: ${{ secrets.TESLA_CLIENT_ID }}
@@ -81,7 +97,7 @@ jobs:
 
       # Runs even if the car couldn't be reached, so the family still hears about prices
       - name: Notify family
-        if: ${{ !cancelled() && steps.fetch.outcome == 'success' }}
+        if: ${{ !cancelled() && env.TASK == 'prices' && steps.fetch.outcome == 'success' }}
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           NOTIFY: ${{ inputs.notify || 'auto' }}

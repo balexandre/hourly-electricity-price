@@ -1,27 +1,26 @@
-// Sends the family push notifications (via ntfy) about electricity prices:
-//   - a reminder shortly before each expensive period (buzzes)
-//   - tomorrow's overview, as soon as the prices are published (silent)
-//   - today's overview in the morning, only when there are expensive hours ahead (silent)
+// Sends the family push notifications (via ntfy) about electricity prices. Once tomorrow's prices are out,
+// one run hands ntfy everything for the next day, and ntfy holds each message until it's due:
+//   - tomorrow's overview at 15:00 (silent)
+//   - a reminder an hour before each expensive period (buzzes)
 //
-//   node scripts/notify.mjs             send whatever is due (this is what the workflow runs, hourly)
-//   node scripts/notify.mjs today       send today's overview right now
+//   node scripts/notify.mjs             schedule whatever isn't scheduled yet (this is what the workflow runs)
 //   node scripts/notify.mjs tomorrow    send tomorrow's overview right now
-//   node scripts/notify.mjs reminder    send the reminder for the next expensive period right now
-//   add --dry-run to print the messages instead of sending them
+//   node scripts/notify.mjs reminder    send the reminder for the next expensive period today right now
+//   add --dry-run to print the messages and when they'd arrive instead of sending them
 //
 // Needs NTFY_TOPIC: the topic name, or the full topic URL (e.g. https://ntfy.sh/my-topic).
 import fs from 'node:fs';
-import { copenhagenNow, addDays } from './time.mjs';
+import { copenhagenNow, copenhagenTimestamp, addDays } from './time.mjs';
 
 const PRICES_FILE = 'data/prices.json';
-// Remembers what was last sent, so hourly runs never send the same thing twice
+// Remembers what was last scheduled, so repeated runs never send the same thing twice
 const SENT_FILE = 'data/notified.json';
 const SITE_URL = 'https://balexandre.github.io/hourly-electricity-price/';
 
-// Today's overview goes out on the first run in this window (Copenhagen time)
-const MORNING = { from: 7, until: 12 };
-// Reminders go out up to this long before an expensive period starts, but never at night
-const REMINDER_LEAD_MINUTES = 60;
+// Tomorrow's overview arrives at this hour, or straight away if the prices came out later
+const OVERVIEW_HOUR = 15;
+// Reminders arrive this long before an expensive period starts, but never at night
+const REMINDER_LEAD_HOURS = 1;
 const AWAKE = { from: 7, until: 22 };
 // Length of the "cheapest block" suggestion, roughly a dishwasher or washing machine cycle
 const BLOCK_HOURS = 3;
@@ -37,8 +36,8 @@ const CAR_EMOJI = '🚙';
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
 const mode = args.find(a => !a.startsWith('--')) ?? 'auto';
-if (!['auto', 'today', 'tomorrow', 'reminder'].includes(mode)) {
-    throw new Error(`Unknown option "${mode}", expected today, tomorrow, reminder or nothing`);
+if (!['auto', 'tomorrow', 'reminder'].includes(mode)) {
+    throw new Error(`Unknown option "${mode}", expected tomorrow, reminder or nothing`);
 }
 
 const data = JSON.parse(fs.readFileSync(PRICES_FILE, 'utf8'));
@@ -52,76 +51,105 @@ const findDay = (date) => [data.today, data.tomorrow].find(d => d?.date === date
 const today = findDay(now.date);
 const tomorrow = findDay(addDays(now.date, 1));
 
-// The expensive period that is coming up next, or is under way right now
-const nextPeak = today && findPeaks(today.hours).find(p => p.end > now.hour);
-const nextPeakKey = nextPeak && `${today.date}T${pad(nextPeak.start)}`;
-const minutesUntilPeak = nextPeak && (nextPeak.start - now.hour) * 60 - now.minute;
-
-const isMorning = now.hour >= MORNING.from && now.hour < MORNING.until;
-const isAwake = now.hour >= AWAKE.from && now.hour < AWAKE.until;
-
-const isDue = {
-    // Only worth a morning message when there's still something to avoid today
-    today: Boolean(isMorning && nextPeak && sent.today !== today.date),
-    reminder: Boolean(isAwake && nextPeak && minutesUntilPeak <= REMINDER_LEAD_MINUTES && sent.reminder !== nextPeakKey),
-    tomorrow: Boolean(tomorrow && sent.tomorrow !== tomorrow.date)
-};
-
-// In this order, so the morning overview lands before a reminder sent in the same run
-const pending = mode === 'auto'
-    ? ['today', 'reminder', 'tomorrow'].filter(kind => isDue[kind])
-    : [mode];
+const pending = mode === 'auto' ? due() : [manual(mode)];
 
 if (pending.length === 0) {
-    console.log('No notification due.');
+    console.log('Nothing to schedule.');
 }
 
-for (const kind of pending) {
-    const { notification, sentAs } = prepare(kind);
+for (const { notification, at, sentAs } of pending) {
+    const when = at > Date.now() ? `at ${describeTime(at)}` : 'now';
 
     if (dryRun) {
-        console.log(`--- [priority ${notification.priority}] ${notification.title} ---\n${notification.message}\n`);
+        console.log(`--- [priority ${notification.priority}, ${when}] ${notification.title} ---\n${notification.message}\n`);
         continue;
     }
 
-    await send(notification);
-    sent[kind] = sentAs;
+    await send(notification, at);
+    // Only ever moves forward, so a manual send never makes the next run repeat what's already scheduled
+    const [key, value] = sentAs;
+    if (!sent[key] || value > sent[key]) sent[key] = value;
     fs.writeFileSync(SENT_FILE, JSON.stringify(sent, null, 2) + '\n');
-    console.log(`Sent ${kind} (${sentAs}).`);
+    console.log(`Sent ${notification.title} (${when}).`);
 }
 
-/** Builds the notification, plus the value recorded in the sent-log once it's out */
-function prepare(kind) {
-    const day = kind === 'tomorrow' ? tomorrow : today;
-    if (!day) throw new Error(`No prices for ${kind === 'tomorrow' ? 'tomorrow' : 'today'} yet`);
+/**
+ * Everything not handed to ntfy yet: tomorrow's overview, plus a reminder for each expensive period
+ * still ahead. Today's are normally scheduled the day before; they're only picked up here after a missed day.
+ */
+function due() {
+    const messages = [];
 
-    if (kind === 'reminder') {
-        if (!nextPeak) throw new Error('No expensive hours left today');
-        return { notification: reminder(day, nextPeak), sentAs: nextPeakKey };
+    if (tomorrow && sent.tomorrow !== tomorrow.date) {
+        messages.push({
+            notification: overview(tomorrow),
+            at: copenhagenTimestamp(now.date, OVERVIEW_HOUR),
+            sentAs: ['tomorrow', tomorrow.date]
+        });
     }
 
-    // This morning's message only talks about the hours still ahead
-    return { notification: overview(kind, day, kind === 'today' ? now.hour : 0), sentAs: day.date };
+    for (const day of [today, tomorrow].filter(Boolean)) {
+        for (const peak of findPeaks(day.hours)) {
+            // "2026-10-22T17" sorts by time, so everything up to the last one sent is done
+            const key = `${day.date}T${pad(peak.start)}`;
+            if (sent.reminder && key <= sent.reminder) continue;
+
+            const hour = reminderHour(peak);
+            // Over before anyone's up, or already over today
+            if (hour === null || (day === today && peak.end <= now.hour)) continue;
+            // Its time has passed, so it would go out right away: not once everyone's in bed
+            if (day === today && hour <= now.hour && now.hour >= AWAKE.until) continue;
+
+            messages.push({
+                notification: reminder(day, peak, Math.max(hour, day === today ? now.hour : 0)),
+                at: copenhagenTimestamp(day.date, hour),
+                sentAs: ['reminder', key]
+            });
+        }
+    }
+
+    return messages;
 }
 
-function overview(which, day, fromHour) {
-    const upcoming = day.hours.filter(h => h.hour >= fromHour);
+/** A message asked for by name, sent right away */
+function manual(kind) {
+    if (kind === 'tomorrow') {
+        if (!tomorrow) throw new Error('No prices for tomorrow yet');
+        return { notification: overview(tomorrow), at: 0, sentAs: ['tomorrow', tomorrow.date] };
+    }
+
+    const nextPeak = today && findPeaks(today.hours).find(p => p.end > now.hour);
+    if (!nextPeak) throw new Error('No expensive hours left today');
+    return {
+        notification: reminder(today, nextPeak, now.hour),
+        at: 0,
+        sentAs: ['reminder', `${today.date}T${pad(nextPeak.start)}`]
+    };
+}
+
+/** The hour a period's reminder arrives: the lead time before it, moved into waking hours, or null if it's over by then */
+function reminderHour(peak) {
+    const hour = Math.min(Math.max(peak.start - REMINDER_LEAD_HOURS, AWAKE.from), AWAKE.until - 1);
+    return hour < peak.end ? hour : null;
+}
+
+function overview(day) {
     const lines = [];
 
-    const peaks = findPeaks(upcoming);
+    const peaks = findPeaks(day.hours);
     if (peaks.length > 0) {
         const highest = Math.max(...peaks.flatMap(p => p.hours).map(h => h.price));
         lines.push(`🔴 Avoid ${peaks.map(formatRange).join(', ')} · up to ${highest.toFixed(2)} kr`);
     } else {
-        lines.push(fromHour > 0 ? '🎉 No expensive hours left today' : '🎉 No expensive hours');
+        lines.push('🎉 No expensive hours');
     }
 
-    const cheapest = cheapestBlock(upcoming, BLOCK_HOURS);
+    const cheapest = cheapestBlock(day.hours, BLOCK_HOURS);
     if (cheapest) {
         lines.push(`✅ Cheapest ${BLOCK_HOURS}h: ${formatRange(cheapest)} · avg ${cheapest.average.toFixed(2)} kr`);
     }
 
-    const car = which === 'tomorrow' && carLine(day);
+    const car = carLine(day);
     if (car) lines.push(car);
 
     // Whole day as two rows of colored dots, each row labelled with its first hour; the car marks charging hours
@@ -137,21 +165,23 @@ function overview(which, day, fromHour) {
     });
 
     return {
-        title: `${which === 'today' ? "Today's" : "Tomorrow's"} prices · ${weekday}`,
+        title: `Tomorrow's prices · ${weekday}`,
         message: lines.join('\n'),
         priority: QUIET,
         tags: ['zap']
     };
 }
 
-function reminder(day, peak) {
+/** @param {number} hour when it arrives, which decides whether the period is still ahead or already on */
+function reminder(day, peak, hour) {
     const highest = Math.max(...peak.hours.map(h => h.price));
     const lines = [`Up to ${highest.toFixed(2)} kr/kWh. Hold off on the dishwasher, laundry and dryer.`];
 
-    // Best time to run them instead: after the peak, through the night if tomorrow's prices are out
+    // Best time to run them instead: after the peak, through the night when the next day's prices are known
+    const nextDay = day === today ? tomorrow : null;
     const later = [
         ...day.hours.filter(h => h.hour >= peak.end),
-        ...(tomorrow?.hours.filter(h => h.hour < AWAKE.from) ?? [])
+        ...(nextDay?.hours.filter(h => h.hour < AWAKE.from) ?? [])
     ];
     const cheapest = cheapestBlock(later, BLOCK_HOURS);
     if (cheapest) {
@@ -159,7 +189,7 @@ function reminder(day, peak) {
     }
 
     return {
-        title: peak.start <= now.hour
+        title: peak.start <= hour
             ? `Expensive electricity until ${pad(peak.end)}:00`
             : `Expensive electricity ${formatRange(peak)}`,
         message: lines.join('\n'),
@@ -231,11 +261,19 @@ function formatRange({ start, end }) {
     return `${pad(start)}:00–${pad(end)}:00`;
 }
 
+/** 1761138000000 → "Thu 22 Oct 15:00" (Copenhagen) */
+function describeTime(timestamp) {
+    return new Date(timestamp).toLocaleString('en-GB', {
+        weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Copenhagen'
+    }).replace(',', '');
+}
+
 function pad(n) {
     return String(n).padStart(2, '0');
 }
 
-async function send({ title, message, priority, tags }) {
+/** @param {number} at when ntfy should deliver it (ms); anything not clearly in the future goes out now */
+async function send({ title, message, priority, tags }, at) {
     if (!process.env.NTFY_TOPIC) throw new Error('NTFY_TOPIC is not set');
 
     // Accept either "my-topic" or "https://ntfy.sh/my-topic"
@@ -251,7 +289,9 @@ async function send({ title, message, priority, tags }) {
             message,
             priority,
             tags,
-            click: SITE_URL
+            click: SITE_URL,
+            // ntfy holds the message until then (up to 3 days ahead) and only then pushes it to the phones
+            ...(at > Date.now() + 60_000 && { delay: String(Math.floor(at / 1000)) })
         })
     });
 

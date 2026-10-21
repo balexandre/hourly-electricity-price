@@ -1,7 +1,8 @@
 // Fetches today's and tomorrow's hourly prices from stromligning.dk and writes data/prices.json,
 // which is what the web page, the notifier and the Tesla step read. It also holds the car's charging plan.
 //
-//   node scripts/fetch-prices.mjs
+//   node scripts/fetch-prices.mjs           fetch, unless tomorrow's prices are already in the file
+//   node scripts/fetch-prices.mjs --force   fetch anyway
 import fs from 'node:fs';
 import { copenhagenNow, addDays } from './time.mjs';
 import { planCharging } from './charging.mjs';
@@ -25,6 +26,17 @@ function getTier(price) {
 const now = copenhagenNow();
 const today = now.date;
 const tomorrow = addDays(today, 1);
+
+const previous = fs.existsSync(OUTPUT_FILE) ? JSON.parse(fs.readFileSync(OUTPUT_FILE, 'utf8')) : null;
+
+// Published prices don't change, so once tomorrow's are in, the day's retries have nothing left to fetch
+const haveTomorrow = previous?.today.date === today && previous.tomorrow.date === tomorrow
+    && previous.tomorrow.hours.length >= 23
+    && JSON.stringify(previous.thresholds) === JSON.stringify(THRESHOLDS);
+if (haveTomorrow && !process.argv.includes('--force')) {
+    console.log(`Already have tomorrow's prices (${tomorrow}), nothing to fetch.`);
+    process.exit(0);
+}
 
 // One request for both days; tomorrow is simply missing from the response until it's published (~13:00)
 const params = new URLSearchParams({
@@ -70,7 +82,6 @@ if (data.today.hours.length === 0) {
     throw new Error(`No prices returned for today (${today})`);
 }
 
-const previous = fs.existsSync(OUTPUT_FILE) ? JSON.parse(fs.readFileSync(OUTPUT_FILE, 'utf8')) : null;
 data.charging = planCharging(data, previous, now);
 
 // Leave the file alone when only the timestamp would change, so the workflow doesn't commit noise
