@@ -1,9 +1,10 @@
 // Turns the Tesla's afternoon charge schedule on or off, following the charging plan that
 // fetch-prices.mjs writes into prices.json (see charging.mjs). The night schedule (02–06) is never touched.
-//   - outside the afternoon window the afternoon schedule is off
+//   - outside the afternoon window the afternoon schedule is off (the workflow's morning run switches it off)
 //   - inside it, the schedule is on once today's plan says the afternoon is cheaper than the night
+//     (the workflow's prices run switches it on, right after tomorrow's prices come out)
 //
-//   node scripts/tesla-charge.mjs          follow the plan and update the car if needed (the workflow runs this hourly)
+//   node scripts/tesla-charge.mjs          follow the plan and update the car if needed (what the workflow runs)
 //   node scripts/tesla-charge.mjs on|off   switch the afternoon schedule on or off right now
 //   add --dry-run to print the decision without contacting the car
 //

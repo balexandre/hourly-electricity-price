@@ -27,3 +27,25 @@ export function addDays(date, days) {
     d.setUTCDate(d.getUTCDate() + days);
     return d.toISOString().slice(0, 10);
 }
+
+/** "2026-10-22", 15 → the moment it's 15:00 that day in Copenhagen, as a timestamp (ms) */
+export function copenhagenTimestamp(date, hour) {
+    const asUtc = Date.parse(`${date}T${String(hour).padStart(2, '0')}:00:00Z`);
+    // Twice, so a first guess on the other side of a clock change still lands on the right offset
+    let timestamp = asUtc;
+    for (let i = 0; i < 2; i++) {
+        timestamp = asUtc - offsetMinutes(timestamp) * 60 * 1000;
+    }
+    return timestamp;
+}
+
+/** How far Copenhagen is ahead of UTC at that moment, in minutes (60 in winter, 120 in summer) */
+function offsetMinutes(timestamp) {
+    const name = new Intl.DateTimeFormat('en-GB', { timeZone: TIME_ZONE, timeZoneName: 'longOffset' })
+        .formatToParts(timestamp)
+        .find(p => p.type === 'timeZoneName').value;
+    // "GMT+02:00", or just "GMT" when there's no offset
+    const match = name.match(/([+-])(\d{2}):(\d{2})/);
+    if (!match) return 0;
+    return (match[1] === '-' ? -1 : 1) * (Number(match[2]) * 60 + Number(match[3]));
+}
