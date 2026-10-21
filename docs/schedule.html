@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily schedule</title>
+  <!-- Source of docs/schedule.svg, the diagram in the README; system fonts so the SVG renders anywhere -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem; color: #38bdf8; }
+    svg { width: 100%; min-width: 1200px; display: block; }
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <h1>Daily schedule</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1200 572" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="schedule-title schedule-desc">
+        <title id="schedule-title">Daily schedule: runs, notifications and charging</title>
+        <desc id="schedule-desc">Each morning a run switches the car's afternoon charging off; each afternoon a run reads tomorrow's prices, switches afternoon charging on when it is cheaper than tonight, and queues tomorrow's overview for 15:00 and a warning an hour before each expensive period tomorrow.</desc>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/></marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#38bdf8"/></marker>
+        </defs>
+        <rect width="1200" height="572" rx="12" fill="#0f172a"/>
+        <text x="160" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="middle">00:00</text>
+        <line x1="160" y1="52" x2="160" y2="496" stroke="rgba(248,250,252,0.06)" stroke-width="1"/>
+        <text x="280" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="middle">03:00</text>
+        <line x1="280" y1="52" x2="280" y2="496" stroke="rgba(248,250,252,0.06)" stroke-width="1"/>
+        <text x="400" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="middle">06:00</text>
+        <line x1="400" y1="52" x2="400" y2="496" stroke="rgba(248,250,252,0.06)" stroke-width="1"/>
+        <text x="520" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="middle">09:00</text>
+        <line x1="520" y1="52" x2="520" y2="496" stroke="rgba(248,250,252,0.06)" stroke-width="1"/>
+        <text x="640" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="middle">12:00</text>
+        <line x1="640" y1="52" x2="640" y2="496" stroke="rgba(248,250,252,0.06)" stroke-width="1"/>
+        <text x="760" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="middle">15:00</text>
+        <line x1="760" y1="52" x2="760" y2="496" stroke="rgba(248,250,252,0.06)" stroke-width="1"/>
+        <text x="880" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="middle">18:00</text>
+        <line x1="880" y1="52" x2="880" y2="496" stroke="rgba(248,250,252,0.06)" stroke-width="1"/>
+        <text x="1000" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="middle">21:00</text>
+        <line x1="1000" y1="52" x2="1000" y2="496" stroke="rgba(248,250,252,0.06)" stroke-width="1"/>
+        <text x="1120" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="middle">24:00</text>
+        <line x1="1120" y1="52" x2="1120" y2="496" stroke="rgba(248,250,252,0.06)" stroke-width="1"/>
+        <line x1="24" y1="272" x2="1040" y2="272" stroke="rgba(248,250,252,0.12)" stroke-width="1"/>
+        <path d="M928 108 H1152 Q1160 108 1160 116 V358 Q1160 366 1152 366 H526 Q518 366 518 374 V378" fill="none" stroke="#38bdf8" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+        <path d="M928 92 H1164 Q1172 92 1172 100 V392 Q1172 400 1164 400 H960" fill="none" stroke="#38bdf8" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+        <rect x="1052" y="264" width="100" height="16" fill="#0f172a"/>
+        <text x="1102" y="276" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#38bdf8" text-anchor="middle" letter-spacing="0.08em">QUEUED AHEAD</text>
+        <text x="24" y="68" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="#f8fafc" text-anchor="start" letter-spacing="0.14em">TODAY</text>
+        <text x="24" y="104" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#94a3b8" text-anchor="start" letter-spacing="0.12em">GITHUB</text>
+        <text x="24" y="172" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#94a3b8" text-anchor="start" letter-spacing="0.12em">PHONES</text>
+        <text x="24" y="218" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#94a3b8" text-anchor="start" letter-spacing="0.12em">CAR</text>
+        <text x="24" y="250" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#94a3b8" text-anchor="start" letter-spacing="0.12em">PRICE</text>
+        <line x1="720" y1="120" x2="720" y2="146" stroke="#38bdf8" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+        <g>
+        <rect x="440" y="80" width="156" height="40" rx="6" fill="#0f172a"/>
+        <rect x="440" y="80" width="156" height="40" rx="6" fill="#1e293b" stroke="rgba(248,250,252,0.12)" stroke-width="1.2"/>
+        <text x="452" y="97" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#f8fafc" text-anchor="start">Car run</text>
+        <text x="452" y="112" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="start">07:00 · afternoon off</text>
+        </g>
+        <g>
+        <rect x="692" y="80" width="236" height="40" rx="6" fill="#0f172a"/>
+        <rect x="692" y="80" width="236" height="40" rx="6" fill="rgba(56,189,248,0.10)" stroke="#38bdf8" stroke-width="1.2"/>
+        <text x="704" y="97" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#f8fafc" text-anchor="start">Prices run</text>
+        <text x="704" y="112" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="start">~13:15 · fetch · car · queue ntfy</text>
+        </g>
+        <g>
+        <rect x="604" y="148" width="156" height="40" rx="6" fill="#0f172a"/>
+        <rect x="604" y="148" width="156" height="40" rx="6" fill="#1e293b" stroke="rgba(248,250,252,0.12)" stroke-width="1.2"/>
+        <text x="616" y="165" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#f8fafc" text-anchor="start">Tomorrow's prices</text>
+        <text x="616" y="180" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="start">15:00 · quiet</text>
+        </g>
+        <g>
+        <rect x="800" y="148" width="156" height="40" rx="6" fill="#0f172a"/>
+        <rect x="800" y="148" width="156" height="40" rx="6" fill="#1e293b" stroke="#ef4444" stroke-width="1.2"/>
+        <text x="812" y="165" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#f8fafc" text-anchor="start">Warning</text>
+        <text x="812" y="180" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="start">16:00 · for 17–21</text>
+        </g>
+        <rect x="240" y="206" width="160" height="20" rx="4" fill="rgba(148,163,184,0.35)"/>
+        <text x="248" y="220" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#f8fafc" text-anchor="start">night · always</text>
+        <rect x="692" y="206" width="148" height="20" rx="4" fill="rgba(148,163,184,0.10)" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="700" y="220" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#f8fafc" text-anchor="start">if cheaper</text>
+        <rect x="161" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="201" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="241" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="281" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="321" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="361" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="401" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="441" y="238" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <rect x="481" y="238" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <rect x="521" y="238" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <rect x="561" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="601" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="641" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="681" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="721" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="761" y="238" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="801" y="238" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <rect x="841" y="238" width="38" height="20" rx="3" fill="#ef4444" opacity="0.85"/>
+        <rect x="881" y="238" width="38" height="20" rx="3" fill="#ef4444" opacity="0.85"/>
+        <rect x="921" y="238" width="38" height="20" rx="3" fill="#ef4444" opacity="0.85"/>
+        <rect x="961" y="238" width="38" height="20" rx="3" fill="#ef4444" opacity="0.85"/>
+        <rect x="1001" y="238" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <rect x="1041" y="238" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <rect x="1081" y="238" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <text x="24" y="300" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="#f8fafc" text-anchor="start" letter-spacing="0.14em">TOMORROW</text>
+        <text x="24" y="336" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#94a3b8" text-anchor="start" letter-spacing="0.12em">GITHUB</text>
+        <text x="24" y="404" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#94a3b8" text-anchor="start" letter-spacing="0.12em">PHONES</text>
+        <text x="24" y="450" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#94a3b8" text-anchor="start" letter-spacing="0.12em">CAR</text>
+        <text x="24" y="482" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="500" fill="#94a3b8" text-anchor="start" letter-spacing="0.12em">PRICE</text>
+        <g opacity="0.55">
+        <rect x="440" y="312" width="156" height="40" rx="6" fill="#0f172a"/>
+        <rect x="440" y="312" width="156" height="40" rx="6" fill="#1e293b" stroke="rgba(248,250,252,0.12)" stroke-width="1.2"/>
+        <text x="452" y="329" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#f8fafc" text-anchor="start">Car run</text>
+        <text x="452" y="344" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="start">07:00 · afternoon off</text>
+        </g>
+        <g opacity="0.55">
+        <rect x="692" y="312" width="236" height="40" rx="6" fill="#0f172a"/>
+        <rect x="692" y="312" width="236" height="40" rx="6" fill="#1e293b" stroke="rgba(248,250,252,0.12)" stroke-width="1.2"/>
+        <text x="704" y="329" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#f8fafc" text-anchor="start">Prices run</text>
+        <text x="704" y="344" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="start">~13:15 · fetch · car · queue ntfy</text>
+        </g>
+        <g>
+        <rect x="440" y="380" width="156" height="40" rx="6" fill="#0f172a"/>
+        <rect x="440" y="380" width="156" height="40" rx="6" fill="#1e293b" stroke="#ef4444" stroke-width="1.2"/>
+        <text x="452" y="397" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#f8fafc" text-anchor="start">Warning</text>
+        <text x="452" y="412" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="start">07:00 · for 08–10</text>
+        </g>
+        <g opacity="0.55">
+        <rect x="604" y="380" width="156" height="40" rx="6" fill="#0f172a"/>
+        <rect x="604" y="380" width="156" height="40" rx="6" fill="#1e293b" stroke="rgba(248,250,252,0.12)" stroke-width="1.2"/>
+        <text x="616" y="397" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#f8fafc" text-anchor="start">Next day's prices</text>
+        <text x="616" y="412" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="start">15:00 · quiet</text>
+        </g>
+        <g>
+        <rect x="800" y="380" width="156" height="40" rx="6" fill="#0f172a"/>
+        <rect x="800" y="380" width="156" height="40" rx="6" fill="#1e293b" stroke="#ef4444" stroke-width="1.2"/>
+        <text x="812" y="397" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#f8fafc" text-anchor="start">Warning</text>
+        <text x="812" y="412" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#94a3b8" text-anchor="start">16:00 · for 17–20</text>
+        </g>
+        <rect x="240" y="438" width="160" height="20" rx="4" fill="rgba(148,163,184,0.35)"/>
+        <text x="248" y="452" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#f8fafc" text-anchor="start">night · always</text>
+        <rect x="692" y="438" width="148" height="20" rx="4" fill="rgba(148,163,184,0.10)" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="700" y="452" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="400" fill="#f8fafc" text-anchor="start">if cheaper</text>
+        <rect x="161" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="201" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="241" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="281" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="321" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="361" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="401" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="441" y="470" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <rect x="481" y="470" width="38" height="20" rx="3" fill="#ef4444" opacity="0.85"/>
+        <rect x="521" y="470" width="38" height="20" rx="3" fill="#ef4444" opacity="0.85"/>
+        <rect x="561" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="601" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="641" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="681" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="721" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="761" y="470" width="38" height="20" rx="3" fill="#22c55e" opacity="0.85"/>
+        <rect x="801" y="470" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <rect x="841" y="470" width="38" height="20" rx="3" fill="#ef4444" opacity="0.85"/>
+        <rect x="881" y="470" width="38" height="20" rx="3" fill="#ef4444" opacity="0.85"/>
+        <rect x="921" y="470" width="38" height="20" rx="3" fill="#ef4444" opacity="0.85"/>
+        <rect x="961" y="470" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <rect x="1001" y="470" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <rect x="1041" y="470" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <rect x="1081" y="470" width="38" height="20" rx="3" fill="#eab308" opacity="0.85"/>
+        <line x1="24" y1="516" x2="1176" y2="516" stroke="rgba(248,250,252,0.12)" stroke-width="1"/>
+        <rect x="24" y="536" width="20" height="14" rx="3" fill="#1e293b" stroke="rgba(248,250,252,0.12)" stroke-width="1.2"/>
+        <text x="52" y="547" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="400" fill="#94a3b8" text-anchor="start">Quiet notification</text>
+        <rect x="196" y="536" width="20" height="14" rx="3" fill="#1e293b" stroke="#ef4444" stroke-width="1.2"/>
+        <text x="224" y="547" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="400" fill="#94a3b8" text-anchor="start">Warning, buzzes (1h before red)</text>
+        <rect x="448" y="536" width="20" height="14" rx="3" fill="rgba(148,163,184,0.35)"/>
+        <text x="476" y="547" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="400" fill="#94a3b8" text-anchor="start">Car charges</text>
+        <rect x="580" y="536" width="20" height="14" rx="3" fill="rgba(148,163,184,0.10)" stroke="#94a3b8" stroke-dasharray="4,3"/>
+        <text x="608" y="547" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="400" fill="#94a3b8" text-anchor="start">Only if cheaper than tonight</text>
+        <rect x="816" y="536" width="6" height="14" rx="1" fill="#22c55e"/><rect x="823" y="536" width="6" height="14" rx="1" fill="#eab308"/><rect x="830" y="536" width="6" height="14" rx="1" fill="#ef4444"/>
+        <text x="844" y="547" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="400" fill="#94a3b8" text-anchor="start">Price level</text>
+        <rect x="944" y="536" width="20" height="14" rx="3" fill="#1e293b" stroke="rgba(248,250,252,0.12)" opacity="0.55"/>
+        <text x="972" y="547" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="400" fill="#94a3b8" text-anchor="start">Repeats daily</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
