@@ -97,6 +97,8 @@ function due() {
             const hour = reminderHour(peak);
             // Over before anyone's up, or already over today
             if (hour === null || (day === today && peak.end <= now.hour)) continue;
+            // Its time has passed, so it would go out right away: not once everyone's in bed
+            if (day === today && hour <= now.hour && now.hour >= AWAKE.until) continue;
 
             messages.push({
                 notification: reminder(day, peak, Math.max(hour, day === today ? now.hour : 0)),
