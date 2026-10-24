@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-23T15:43:33.568Z",
+  "updatedAt": "2026-10-24T14:28:42.607Z",
   "product": "Andel Energi TimeEnergi",
   "priceArea": "DK2",
   "unit": "DKK/kWh",
@@ -8,131 +8,6 @@
     "high": 3.2
   },
   "today": {
-    "date": "2026-10-23",
-    "hours": [
-      {
-        "hour": 0,
-        "price": 2.0141,
-        "tier": "green"
-      },
-      {
-        "hour": 1,
-        "price": 1.9171,
-        "tier": "green"
-      },
-      {
-        "hour": 2,
-        "price": 1.8885,
-        "tier": "green"
-      },
-      {
-        "hour": 3,
-        "price": 1.9032,
-        "tier": "green"
-      },
-      {
-        "hour": 4,
-        "price": 1.8724,
-        "tier": "green"
-      },
-      {
-        "hour": 5,
-        "price": 1.9167,
-        "tier": "green"
-      },
-      {
-        "hour": 6,
-        "price": 2.3872,
-        "tier": "yellow"
-      },
-      {
-        "hour": 7,
-        "price": 2.582,
-        "tier": "yellow"
-      },
-      {
-        "hour": 8,
-        "price": 2.7448,
-        "tier": "yellow"
-      },
-      {
-        "hour": 9,
-        "price": 2.4815,
-        "tier": "yellow"
-      },
-      {
-        "hour": 10,
-        "price": 2.252,
-        "tier": "yellow"
-      },
-      {
-        "hour": 11,
-        "price": 1.9975,
-        "tier": "green"
-      },
-      {
-        "hour": 12,
-        "price": 1.8126,
-        "tier": "green"
-      },
-      {
-        "hour": 13,
-        "price": 1.7558,
-        "tier": "green"
-      },
-      {
-        "hour": 14,
-        "price": 1.7971,
-        "tier": "green"
-      },
-      {
-        "hour": 15,
-        "price": 1.8431,
-        "tier": "green"
-      },
-      {
-        "hour": 16,
-        "price": 1.9096,
-        "tier": "green"
-      },
-      {
-        "hour": 17,
-        "price": 2.8673,
-        "tier": "yellow"
-      },
-      {
-        "hour": 18,
-        "price": 2.8601,
-        "tier": "yellow"
-      },
-      {
-        "hour": 19,
-        "price": 2.8317,
-        "tier": "yellow"
-      },
-      {
-        "hour": 20,
-        "price": 2.4938,
-        "tier": "yellow"
-      },
-      {
-        "hour": 21,
-        "price": 1.5059,
-        "tier": "green"
-      },
-      {
-        "hour": 22,
-        "price": 1.5693,
-        "tier": "green"
-      },
-      {
-        "hour": 23,
-        "price": 1.4364,
-        "tier": "green"
-      }
-    ]
-  },
-  "tomorrow": {
     "date": "2026-10-24",
     "hours": [
       {
@@ -257,6 +132,136 @@
       }
     ]
   },
+  "tomorrow": {
+    "date": "2026-10-25",
+    "hours": [
+      {
+        "hour": 0,
+        "price": 0.4913,
+        "tier": "green"
+      },
+      {
+        "hour": 1,
+        "price": 0.4878,
+        "tier": "green"
+      },
+      {
+        "hour": 2,
+        "price": 0.4737,
+        "tier": "green"
+      },
+      {
+        "hour": 2,
+        "price": 0.4713,
+        "tier": "green"
+      },
+      {
+        "hour": 3,
+        "price": 0.4695,
+        "tier": "green"
+      },
+      {
+        "hour": 4,
+        "price": 0.4701,
+        "tier": "green"
+      },
+      {
+        "hour": 5,
+        "price": 0.4686,
+        "tier": "green"
+      },
+      {
+        "hour": 6,
+        "price": 0.7569,
+        "tier": "green"
+      },
+      {
+        "hour": 7,
+        "price": 0.7428,
+        "tier": "green"
+      },
+      {
+        "hour": 8,
+        "price": 0.7393,
+        "tier": "green"
+      },
+      {
+        "hour": 9,
+        "price": 0.7398,
+        "tier": "green"
+      },
+      {
+        "hour": 10,
+        "price": 0.7336,
+        "tier": "green"
+      },
+      {
+        "hour": 11,
+        "price": 0.7408,
+        "tier": "green"
+      },
+      {
+        "hour": 12,
+        "price": 0.745,
+        "tier": "green"
+      },
+      {
+        "hour": 13,
+        "price": 0.7571,
+        "tier": "green"
+      },
+      {
+        "hour": 14,
+        "price": 0.777,
+        "tier": "green"
+      },
+      {
+        "hour": 15,
+        "price": 0.7712,
+        "tier": "green"
+      },
+      {
+        "hour": 16,
+        "price": 0.9401,
+        "tier": "green"
+      },
+      {
+        "hour": 17,
+        "price": 2.1264,
+        "tier": "yellow"
+      },
+      {
+        "hour": 18,
+        "price": 2.1491,
+        "tier": "yellow"
+      },
+      {
+        "hour": 19,
+        "price": 2.0421,
+        "tier": "green"
+      },
+      {
+        "hour": 20,
+        "price": 1.9138,
+        "tier": "green"
+      },
+      {
+        "hour": 21,
+        "price": 0.8657,
+        "tier": "green"
+      },
+      {
+        "hour": 22,
+        "price": 0.9392,
+        "tier": "green"
+      },
+      {
+        "hour": 23,
+        "price": 0.8116,
+        "tier": "green"
+      }
+    ]
+  },
   "charging": {
     "night": {
       "from": 2,
@@ -266,6 +271,11 @@
       "from": 12,
       "until": 17
     },
-    "decision": null
+    "decision": {
+      "date": "2026-10-24",
+      "charge": false,
+      "afternoon": 0.936,
+      "night": 0.471
+    }
   }
 }
