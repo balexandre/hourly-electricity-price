@@ -5,8 +5,9 @@
 //   node scripts/cron-job-setup.mjs --dry-run  show what would be sent, without the tokens
 //
 // Needs CRONJOB_ORG_API_TOKEN (cron-job.org → Settings → API) and GITHUB_DISPATCH_TOKEN (a fine-grained
-// GitHub token for this repo only, with "Actions: Read and write") in .env.
-// cron-job.org keeps the GitHub token to send with each call; it can start workflows, nothing else.
+// GitHub token for this repo only, with "Actions: Read and write") in .env. Needs Node.js 20.12+.
+// cron-job.org keeps the GitHub token to send with each call. Besides starting workflows it can cancel or
+// delete runs and their logs and artifacts, and switch workflows off, but it can't read secrets or change code.
 import fs from 'node:fs';
 
 if (fs.existsSync('.env')) process.loadEnvFile('.env');

@@ -94,9 +94,9 @@ const THRESHOLDS = { low: 2.1, high: 3.2 };
 2. **Phones**: install the ntfy app ([Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) / [iOS](https://apps.apple.com/app/ntfy/id1625396347)), tap **+** and subscribe to the same topic on `ntfy.sh`.
 3. **Test**: *Actions → Update prices & deploy → Run workflow*, and choose `tomorrow` or `reminder` to send one right away. Choose the `car` task to run the morning car switch.
 4. **On-time runs**: GitHub's schedule is often hours late, so cron-job.org starts the runs instead.
-   - Create a [fine-grained GitHub token](https://github.com/settings/personal-access-tokens/new) for this repo only, with *Actions: Read and write*, and put it in `.env` as `GITHUB_DISPATCH_TOKEN`.
+   - Create a [fine-grained GitHub token](https://github.com/settings/personal-access-tokens/new) for this repo only, with *Actions: Read and write*, and put it in `.env` as `GITHUB_DISPATCH_TOKEN`. cron-job.org keeps it, and besides starting runs it can cancel or delete runs and their logs and artifacts, and switch workflows off, but it can't read secrets or change code.
    - Create an API key at *cron-job.org → Settings → API* and put it in `.env` as `CRONJOB_ORG_API_TOKEN`.
-   - Run `node scripts/cron-job-setup.mjs` (add `--dry-run` to preview). It creates the two jobs, or updates them if they're already there. Run it again with a new token before the old one expires; cron-job.org emails you if the calls start failing.
+   - Run `node scripts/cron-job-setup.mjs` (Node.js 20.12+; add `--dry-run` to preview). It creates the two jobs, or updates them if they're already there. Run it again with a new token before the old one expires; cron-job.org emails you if the calls start failing.
 5. **Install** (optional): open the site on the phone, then *Share → Add to Home Screen* (iPhone) or *⋮ → Add to Home screen* (Android).
 
 ## Local Development
