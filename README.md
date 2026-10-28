@@ -11,13 +11,14 @@ A clean, responsive web application to visualize hourly electricity prices for T
   - Green below **2.1 DKK/kWh**.
   - Yellow below **3.2 DKK/kWh**, red above.
 - **Push Notifications** via [ntfy](https://ntfy.sh): a warning an hour before each expensive period, plus a quiet overview of tomorrow at 15:00.
+- **On Time**: tomorrow's prices are usually on the site by 13:20, minutes after they're published.
 - **Tesla Charging**: the car's afternoon charge schedule is only switched on when the afternoon is cheaper than the night after (optional).
 - **Responsive Design**: Glassmorphism UI that looks great on all devices.
 - **Installable**: "Add to Home Screen" opens it full-screen like an app, with its own icon.
 
 ## How it works
 
-The GitHub Action (`.github/workflows/deploy.yml`) does two jobs a day, plus a prices run on every push. All times are Copenhagen:
+The GitHub Action (`.github/workflows/deploy.yml`) does two jobs a day, plus a prices run on every push. [cron-job.org](https://cron-job.org) starts the daily jobs on time, and GitHub's own schedule is the backup. All times are Copenhagen:
 
 ![Daily schedule: a car run at 07:00 and a prices run around 13:15, which queues tomorrow's overview for 15:00 and a warning an hour before each expensive period tomorrow](docs/schedule.svg)
 
@@ -40,9 +41,19 @@ Car run at 07:00 with a second try at 09:00
    └─► commits data/charge.json
 ```
 
-GitHub often starts scheduled runs hours late or skips them, so [cron-job.org](https://cron-job.org) starts the runs on time instead (see [Setup](#setup)). The workflow keeps its own schedule as a backup, in UTC, so it runs an hour earlier in winter. Each job has a few tries: the first one that finds something to do does it, and the rest change nothing. Notifications don't depend on when a run starts: [ntfy holds each message](https://docs.ntfy.sh/publish/#scheduled-delivery) and delivers it at its time. Only tomorrow's overview can be late, if no prices run gets through before 15:00.
+cron-job.org is there because GitHub often starts scheduled runs hours late or skips them. The backup schedule is in UTC, so it runs an hour earlier in winter. Each job has a few tries: the first one that finds something to do does it, and the rest change nothing. Notifications don't depend on when a run starts: [ntfy holds each message](https://docs.ntfy.sh/publish/#scheduled-delivery) and delivers it at its time. Only tomorrow's overview can be late, if no prices run gets through before 15:00.
 
 The web page only reads `data/prices.json`; it never calls the price API itself.
+
+Services:
+
+| Service | What for | Credentials |
+| --- | --- | --- |
+| [stromligning.dk](https://stromligning.dk/api/docs) | today's and tomorrow's hourly prices | none |
+| [GitHub Actions](https://github.com/features/actions) + [Pages](https://pages.github.com) | runs the scripts, hosts the site | built in |
+| [cron-job.org](https://cron-job.org) | starts the daily runs on time | GitHub token, kept by cron-job.org ([Setup](#setup)) |
+| [ntfy](https://ntfy.sh) | push notifications to the phones | `NTFY_TOPIC` secret |
+| [Tesla Fleet API](https://developer.tesla.com) | switches the car's afternoon charging (optional) | `TESLA_*` secrets ([Tesla Charging](#tesla-charging)) |
 
 Notifications:
 
