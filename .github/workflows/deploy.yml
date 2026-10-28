@@ -3,7 +3,8 @@ name: Update prices & deploy
 on:
   push:
     branches: ["master"]
-  # GitHub often starts scheduled runs late or skips them, so each job gets several tries.
+  # GitHub often starts scheduled runs hours late or skips them, so cron-job.org starts the runs on time
+  # through workflow_dispatch (scripts/cron-job-setup.mjs). This schedule stays as the backup.
   # Every step works out what's due in Copenhagen time, so the extra tries change nothing.
   schedule:
     # Prices: tomorrow's come out around 13:00. The first try that finds them switches the car on for a cheap
@@ -123,10 +124,11 @@ jobs:
           git pull --rebase
           git push
 
-  # Pushes made with GITHUB_TOKEN don't trigger other workflows, so deploy from here
+  # Pushes made with GITHUB_TOKEN don't trigger other workflows, so deploy from here.
+  # A push deploys the new code; the timed runs (scheduled or from cron-job.org) only when there are new prices.
   deploy:
     needs: update
-    if: ${{ !cancelled() && (github.event_name != 'schedule' || needs.update.outputs.prices_changed == 'true') }}
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.update.outputs.prices_changed == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       pages: write

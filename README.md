@@ -22,7 +22,7 @@ The GitHub Action (`.github/workflows/deploy.yml`) does two jobs a day, plus a p
 ![Daily schedule: a car run at 07:00 and a prices run around 13:15, which queues tomorrow's overview for 15:00 and a warning an hour before each expensive period tomorrow](docs/schedule.svg)
 
 ```
-Prices run, tried every 30 min from 13:15 to 15:45 (12:15 to 14:45 in winter); tomorrow's prices come out around 13:00
+Prices run, tried at 13:15, 13:45, 14:15 and 14:45; tomorrow's prices come out around 13:00
    │
    ├─► 1. scripts/fetch-prices.mjs   fetches today + tomorrow from stromligning.dk and plans
    │                                 when the car charges → data/prices.json
@@ -34,13 +34,13 @@ Prices run, tried every 30 min from 13:15 to 15:45 (12:15 to 14:45 in winter); t
    ├─► 4. commits data/ back to the repo (only when something changed)
    └─► 5. deploys the site to GitHub Pages
 
-Car run at 07:00 with a second try at 09:00 (06:00 and 08:00 in winter: GitHub's schedule is in UTC)
+Car run at 07:00 with a second try at 09:00
    │
    ├─► scripts/tesla-charge.mjs      switches the afternoon charging back off
    └─► commits data/charge.json
 ```
 
-GitHub often starts scheduled runs late or skips them, so each job has a few tries. The first one that finds something to do does it, and the rest change nothing. Notifications don't depend on when a run starts: [ntfy holds each message](https://docs.ntfy.sh/publish/#scheduled-delivery) and delivers it at its time. Only tomorrow's overview can be late, if no prices run gets through before 15:00.
+GitHub often starts scheduled runs hours late or skips them, so [cron-job.org](https://cron-job.org) starts the runs on time instead (see [Setup](#setup)). The workflow keeps its own schedule as a backup, in UTC, so it runs an hour earlier in winter. Each job has a few tries: the first one that finds something to do does it, and the rest change nothing. Notifications don't depend on when a run starts: [ntfy holds each message](https://docs.ntfy.sh/publish/#scheduled-delivery) and delivers it at its time. Only tomorrow's overview can be late, if no prices run gets through before 15:00.
 
 The web page only reads `data/prices.json`; it never calls the price API itself.
 
@@ -93,7 +93,11 @@ const THRESHOLDS = { low: 2.1, high: 3.2 };
 1. **Secret**: in the repo, go to *Settings → Secrets and variables → Actions → New repository secret* and add `NTFY_TOPIC` with the ntfy topic name (or full topic URL). Anyone who knows the topic can read and send to it, so never commit it.
 2. **Phones**: install the ntfy app ([Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) / [iOS](https://apps.apple.com/app/ntfy/id1625396347)), tap **+** and subscribe to the same topic on `ntfy.sh`.
 3. **Test**: *Actions → Update prices & deploy → Run workflow*, and choose `tomorrow` or `reminder` to send one right away. Choose the `car` task to run the morning car switch.
-4. **Install** (optional): open the site on the phone, then *Share → Add to Home Screen* (iPhone) or *⋮ → Add to Home screen* (Android).
+4. **On-time runs**: GitHub's schedule is often hours late, so cron-job.org starts the runs instead.
+   - Create a [fine-grained GitHub token](https://github.com/settings/personal-access-tokens/new) for this repo only, with *Actions: Read and write*, and put it in `.env` as `GITHUB_DISPATCH_TOKEN`.
+   - Create an API key at *cron-job.org → Settings → API* and put it in `.env` as `CRONJOB_ORG_API_TOKEN`.
+   - Run `node scripts/cron-job-setup.mjs` (add `--dry-run` to preview). It creates the two jobs, or updates them if they're already there. Run it again with a new token before the old one expires; cron-job.org emails you if the calls start failing.
+5. **Install** (optional): open the site on the phone, then *Share → Add to Home Screen* (iPhone) or *⋮ → Add to Home screen* (Android).
 
 ## Local Development
 
