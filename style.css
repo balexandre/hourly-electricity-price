@@ -215,3 +215,241 @@ footer {
         margin-bottom: 2rem;
     }
 }
+
+/* ---------- Wind ---------- */
+
+/* Same colors as the price levels: a windy day is a cheap one */
+.tier-dot {
+    display: inline-block;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+    background: var(--tier-color);
+    vertical-align: middle;
+    flex: none;
+}
+
+.tier-dot[data-tier="green"] { --tier-color: var(--price-green); }
+.tier-dot[data-tier="yellow"] { --tier-color: var(--price-yellow); }
+.tier-dot[data-tier="red"] { --tier-color: var(--price-red); }
+
+.wind-content[hidden],
+.wind-now[hidden],
+.wind-outlook[hidden] {
+    display: none;
+}
+
+.wind-arrow {
+    display: inline-block;
+    width: 1.1em;
+    height: 1.1em;
+    color: var(--accent-color);
+    flex: none;
+}
+
+.wind-now {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.wind-now p {
+    margin: 0;
+}
+
+.wind-now-label,
+.wind-now-hint {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.wind-now .wind-now-value {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0.25rem 0 0.5rem;
+}
+
+.wind-now-speed {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.wind-now-unit {
+    color: var(--text-secondary);
+}
+
+/* Pill like the price level's */
+.wind-now-direction {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.wind-outlook {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto 1.5rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.875rem;
+    text-align: left;
+}
+
+.chart-container.wind-chart {
+    height: 260px;
+    margin-bottom: 1.5rem;
+}
+
+.wind-days {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.wind-day {
+    display: grid;
+    grid-template-columns: 6.5rem 9.5rem 1fr 6.5rem;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.7rem 0.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.wind-day:first-child {
+    border-top: 0;
+}
+
+.wind-day small {
+    display: block;
+    color: var(--text-secondary);
+    font-weight: 400;
+    font-size: 0.75rem;
+}
+
+.wind-day-name {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.wind-day-name .tier-dot {
+    margin-left: 0.25rem;
+}
+
+.wind-day-direction {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.wind-day-direction .wind-arrow {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.wind-range {
+    position: relative;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.wind-range-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: 999px;
+    background: linear-gradient(to right, #38bdf8, #818cf8);
+}
+
+.wind-range-gust {
+    position: absolute;
+    top: -0.25rem;
+    width: 2px;
+    height: 1rem;
+    border-radius: 1px;
+    background: #818cf8;
+}
+
+.wind-day-speed {
+    text-align: right;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.wind-day-speed b {
+    font-size: 1rem;
+}
+
+.wind-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.25rem;
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.wind-legend > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.wind-legend-range {
+    width: 1.5rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: linear-gradient(to right, #38bdf8, #818cf8);
+}
+
+.wind-legend-gust {
+    width: 2px;
+    height: 0.8rem;
+    background: #818cf8;
+}
+
+.wind-source {
+    text-align: center;
+    font-size: 0.75rem;
+    margin-bottom: 0;
+}
+
+.wind-source a {
+    color: var(--text-secondary);
+}
+
+@media (max-width: 640px) {
+    .chart-container.wind-chart {
+        height: 200px;
+    }
+
+    .wind-day {
+        grid-template-columns: 6rem 1fr auto;
+        grid-template-areas: 'name direction speed' 'range range range';
+        row-gap: 0.6rem;
+        column-gap: 0.75rem;
+    }
+
+    .wind-day-name { grid-area: name; }
+    .wind-day-direction { grid-area: direction; }
+    .wind-day-speed { grid-area: speed; }
+    .wind-range { grid-area: range; }
+}
