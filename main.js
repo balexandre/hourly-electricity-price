@@ -1,5 +1,9 @@
+import { renderWind } from './wind.js';
+
 // Written by scripts/fetch-prices.mjs (GitHub Action, several times a day)
 const PRICES_URL = './data/prices.json';
+// Written by scripts/fetch-wind.mjs (same Action, about twice a day)
+const WIND_URL = './data/wind.json';
 // Blue so charging hours never look like a price warning, same as in the notifications
 const CAR_EMOJI = '🚙';
 
@@ -311,6 +315,9 @@ function formatDate(date) {
 
     return `${weekday}, ${month} ${getOrdinal(day)}, ${year}`;
 }
+
+// On its own, so the prices still show without the wind forecast and the other way round
+loadJson(WIND_URL).then(wind => renderWind(wind, copenhagenNow()));
 
 (async () => {
     const now = copenhagenNow();

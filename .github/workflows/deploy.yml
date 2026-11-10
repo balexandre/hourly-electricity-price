@@ -41,7 +41,7 @@ jobs:
       # The morning run only touches the car; everything else is a prices run
       TASK: ${{ github.event.schedule == '0 5,7 * * *' && 'car' || inputs.task || 'prices' }}
     outputs:
-      prices_changed: ${{ steps.commit.outputs.prices_changed }}
+      site_changed: ${{ steps.commit.outputs.site_changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,6 +55,14 @@ jobs:
         id: fetch
         if: ${{ env.TASK == 'prices' }}
         run: node scripts/fetch-prices.mjs
+
+      # On every run, car runs included, so the site's wind forecast is fresh in the morning and after lunch.
+      # The script skips it when the file is under 4 hours old, so retries don't commit it again.
+      # Only the web page reads it, so a failure here mustn't stop the car or the notifications.
+      - name: Fetch wind forecast
+        continue-on-error: true
+        timeout-minutes: 2
+        run: node scripts/fetch-wind.mjs
 
       # Tesla's signing tool, built once and then restored from the cache
       - name: Cache tesla-control
@@ -114,9 +122,10 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
-          # Only new prices (and the charging plan in them) need a redeploy; a sent-log update alone doesn't change the site
-          if ! git diff --cached --quiet -- data/prices.json; then
-            echo "prices_changed=true" >> "$GITHUB_OUTPUT"
+          # Only what the page shows needs a redeploy: prices (and the charging plan in them) or the wind forecast.
+          # A sent-log update alone doesn't change the site.
+          if ! git diff --cached --quiet -- data/prices.json data/wind.json; then
+            echo "site_changed=true" >> "$GITHUB_OUTPUT"
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -125,10 +134,10 @@ jobs:
           git push
 
   # Pushes made with GITHUB_TOKEN don't trigger other workflows, so deploy from here.
-  # A push deploys the new code; the timed runs (scheduled or from cron-job.org) only when there are new prices.
+  # A push deploys the new code; the timed runs (scheduled or from cron-job.org) only when there are new prices or wind.
   deploy:
     needs: update
-    if: ${{ !cancelled() && (github.event_name == 'push' || needs.update.outputs.prices_changed == 'true') }}
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.update.outputs.site_changed == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       pages: write

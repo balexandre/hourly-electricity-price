@@ -58,6 +58,41 @@
             <p class="charging subtitle" hidden></p>
         </section>
 
+        <hr class="section-divider">
+
+        <section id="wind-section" class="wind-section">
+            <h2 class="subtitle">Wind · next 10 days</h2>
+            <div class="loading">
+                <div class="spinner"></div>
+                <p class="subtitle">Loading the wind forecast...</p>
+            </div>
+            <div class="wind-content" hidden>
+                <div class="wind-now" hidden>
+                    <p class="wind-now-label"></p>
+                    <p class="wind-now-value">
+                        <span class="wind-now-speed"></span>
+                        <span class="wind-now-unit">m/s</span>
+                        <span class="wind-now-direction"></span>
+                    </p>
+                    <p class="wind-now-hint"></p>
+                </div>
+                <p class="wind-outlook" hidden></p>
+                <div class="chart-container wind-chart">
+                    <canvas></canvas>
+                </div>
+                <ul class="wind-days"></ul>
+                <div class="wind-legend">
+                    <span><span class="tier-dot" data-tier="green"></span>Windy, power likely cheap</span>
+                    <span><span class="tier-dot" data-tier="yellow"></span>Some wind</span>
+                    <span><span class="tier-dot" data-tier="red"></span>Little wind, likely pricey</span>
+                    <span><i class="wind-legend-range"></i>Lowest–highest wind</span>
+                    <span><i class="wind-legend-gust"></i>Strongest gust</span>
+                    <span><svg class="wind-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l6 9h-4v9h-4v-9H6z" fill="currentColor"/></svg>Where the wind blows to</span>
+                </div>
+                <p class="wind-source subtitle"></p>
+            </div>
+        </section>
+
         <footer>
             <p class="subtitle">
                  *Andel Energi Timeenergi

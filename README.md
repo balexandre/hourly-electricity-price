@@ -10,6 +10,7 @@ A clean, responsive web application to visualize hourly electricity prices for T
 - **Price Thresholds** (total price incl. tariffs and VAT):
   - Green below **2.1 DKK/kWh**.
   - Yellow below **3.2 DKK/kWh**, red above.
+- **Wind Forecast**: the next 10 days of wind from [Open-Meteo](https://open-meteo.com) — speed, gusts and where it blows from and to. Wind is what moves Danish prices most, so each day gets a dot: green when it's windy (power likely cheap), yellow for some wind, red when it's calm (likely pricey). A line says when the next windier days are.
 - **Push Notifications** via [ntfy](https://ntfy.sh): a warning an hour before each expensive period, plus a quiet overview of tomorrow at 15:00.
 - **On Time**: tomorrow's prices are usually on the site by 13:20, minutes after they're published.
 - **Tesla Charging**: the car's afternoon charge schedule is only switched on when the afternoon is cheaper than the night after (optional).
@@ -28,28 +29,33 @@ Prices run, tried at 13:15, 13:45, 14:15 and 14:45; tomorrow's prices come out a
    ├─► 1. scripts/fetch-prices.mjs   fetches today + tomorrow from stromligning.dk and plans
    │                                 when the car charges → data/prices.json
    │                                 (once a day: skipped when tomorrow's prices are already there)
+   ├─► 1b. scripts/fetch-wind.mjs    fetches the 10-day wind forecast from Open-Meteo → data/wind.json
+   │                                 (skipped when it's under 4 hours old; only the site reads it)
    ├─► 2. scripts/tesla-charge.mjs   switches the car's afternoon charging on if it's cheaper than tonight
    │                                 (remembers what the car was set to in data/charge.json)
    ├─► 3. scripts/notify.mjs         hands ntfy all of tomorrow's notifications, each with its delivery time
    │                                 (remembers what it queued in data/notified.json)
    ├─► 4. commits data/ back to the repo (only when something changed)
-   └─► 5. deploys the site to GitHub Pages
+   └─► 5. deploys the site to GitHub Pages (when the prices or the wind changed)
 
 Car run at 07:00 with a second try at 09:00
    │
+   ├─► scripts/fetch-wind.mjs        refreshes the wind forecast for the morning
    ├─► scripts/tesla-charge.mjs      switches the afternoon charging back off
-   └─► commits data/charge.json
+   ├─► commits data/charge.json and data/wind.json
+   └─► deploys the site when the wind changed
 ```
 
 cron-job.org is there because GitHub often starts scheduled runs hours late or skips them. The backup schedule is in UTC, so it runs an hour earlier in winter. Each job has a few tries: the first one that finds something to do does it, and the rest change nothing. Notifications don't depend on when a run starts: [ntfy holds each message](https://docs.ntfy.sh/publish/#scheduled-delivery) and delivers it at its time. Only tomorrow's overview can be late, if no prices run gets through before 15:00.
 
-The web page only reads `data/prices.json`; it never calls the price API itself.
+The web page only reads `data/prices.json` and `data/wind.json`; it never calls the APIs itself.
 
 Services:
 
 | Service | What for | Credentials |
 | --- | --- | --- |
 | [stromligning.dk](https://stromligning.dk/api/docs) | today's and tomorrow's hourly prices | none |
+| [Open-Meteo](https://open-meteo.com) | 10-day hourly wind forecast (free for non-commercial use) | none |
 | [GitHub Actions](https://github.com/features/actions) + [Pages](https://pages.github.com) | runs the scripts, hosts the site | built in |
 | [cron-job.org](https://cron-job.org) | starts the daily runs on time | GitHub token, kept by cron-job.org ([Setup](#setup)) |
 | [ntfy](https://ntfy.sh) | push notifications to the phones | `NTFY_TOPIC` secret |
@@ -99,6 +105,23 @@ const SUPPLIER_ID = 'cerius_c';
 const THRESHOLDS = { low: 2.1, high: 3.2 };
 ```
 
+### Wind
+
+The wind forecast is for central Copenhagen, since the prices are for DK2 (east Denmark). Speeds are in m/s at 10 m, the height weather forecasts use. A day's color comes from its average wind:
+
+| Average wind | Dot | Means |
+| --- | --- | --- |
+| 6 m/s or more | 🟢 | Windy, power likely cheap |
+| 3.5–6 m/s | 🟡 | Some wind |
+| Below 3.5 m/s | 🔴 | Calm, power likely pricey |
+
+The thresholds come from comparing the wind with this repo's prices for 17 Oct–11 Nov 2026: the two moved together closely (correlation −0.90). Every day averaging 6+ m/s had green prices (0.9–1.7 kr), and days under 3.5 m/s mostly red (2.9–4.4 kr). The location and thresholds are set at the top of `scripts/fetch-wind.mjs`:
+
+```js
+const LOCATION = { name: 'Copenhagen', latitude: 55.68, longitude: 12.57 };
+const THRESHOLDS = { low: 3.5, high: 6 };
+```
+
 ## Setup
 
 1. **Secret**: in the repo, go to *Settings → Secrets and variables → Actions → New repository secret* and add `NTFY_TOPIC` with the ntfy topic name (or full topic URL). Anyone who knows the topic can read and send to it, so never commit it.
@@ -116,6 +139,7 @@ No dependencies or build step, just Node.js 18+.
 
 ```bash
 node scripts/fetch-prices.mjs      # refresh data/prices.json (add --force once tomorrow's are in)
+node scripts/fetch-wind.mjs        # refresh data/wind.json (add --force if it's under 4 hours old)
 node scripts/notify.mjs --dry-run  # preview what would be queued, and when it'd arrive
 node scripts/notify.mjs tomorrow --dry-run
 node scripts/notify.mjs reminder --dry-run
