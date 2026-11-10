@@ -21,11 +21,16 @@ const TIER_RANK = { red: 0, yellow: 1, green: 2 };
 const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 const COMPASS_WORDS = { N: 'north', NE: 'northeast', E: 'east', SE: 'southeast', S: 'south', SW: 'southwest', W: 'west', NW: 'northwest' };
 
-// Beaufort names, by the upper limit in m/s
+// Beaufort names, each up to (not including) the m/s where the next one starts
 const SCALE = [
-    [1.6, 'Calm'], [3.4, 'Light breeze'], [5.5, 'Gentle breeze'], [8, 'Moderate breeze'], [10.8, 'Fresh breeze'],
-    [13.9, 'Strong breeze'], [17.2, 'Near gale'], [20.8, 'Gale'], [Infinity, 'Strong gale']
+    [0.5, 'Calm'], [1.6, 'Light air'], [3.4, 'Light breeze'], [5.5, 'Gentle breeze'], [8, 'Moderate breeze'],
+    [10.8, 'Fresh breeze'], [13.9, 'Strong breeze'], [17.2, 'Near gale'], [20.8, 'Gale'], [24.5, 'Strong gale'],
+    [28.5, 'Storm'], [32.7, 'Violent storm'], [Infinity, 'Hurricane force']
 ];
+
+// A day this much windier on average than today counts as windier even in the same color.
+// Going by Oct-Nov 2026, 2 m/s more wind was worth roughly 1 kr/kWh off the price.
+const NOTABLY_WINDIER = 2;
 
 // Chart arrows: one every 12 hours, or one a day on phones (the day rows have the detail)
 const ARROW_EVERY = window.matchMedia('(max-width: 640px)').matches ? 24 : 12;
@@ -107,11 +112,11 @@ function outlook(days) {
     if (windy.length > 0) {
         return { tier: 'green', text: `Windier ${dayRanges(windy, dates)}: power will likely be cheaper then` };
     }
-    const better = later.filter(d => TIER_RANK[d.tier] > TIER_RANK[today.tier]);
+    const better = later.filter(d => TIER_RANK[d.tier] > TIER_RANK[today.tier] || d.average >= today.average + NOTABLY_WINDIER);
     if (better.length > 0) {
         return { tier: 'yellow', text: `A bit windier ${dayRanges(better, dates)}: power may be a little cheaper then` };
     }
-    return { tier: today.tier, text: 'No windier days in the forecast' };
+    return { tier: today.tier, text: 'No days much windier than today in the forecast' };
 }
 
 function showNow(section, hour) {

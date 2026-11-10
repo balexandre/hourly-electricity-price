@@ -61,6 +61,7 @@ jobs:
       # Only the web page reads it, so a failure here mustn't stop the car or the notifications.
       - name: Fetch wind forecast
         continue-on-error: true
+        timeout-minutes: 2
         run: node scripts/fetch-wind.mjs
 
       # Tesla's signing tool, built once and then restored from the cache

@@ -19,6 +19,9 @@ const THRESHOLDS = { low: 3.5, high: 6 };
 // So the forecast is committed about twice a day, not on every try.
 const MAX_AGE_HOURS = 4;
 
+// The car and the notifications run after this, so a stuck request mustn't hold them up
+const TIMEOUT_MS = 30_000;
+
 const OUTPUT_FILE = 'data/wind.json';
 
 function getTier(average) {
@@ -48,7 +51,9 @@ const params = new URLSearchParams({
     forecast_days: FORECAST_DAYS
 });
 
-const response = await fetch(`${API_URL}?${params}`);
+// The signal also covers reading the body; on a timeout the old file stays and the workflow carries on
+const signal = AbortSignal.timeout(TIMEOUT_MS);
+const response = await fetch(`${API_URL}?${params}`, { signal });
 if (!response.ok) {
     throw new Error(`Open-Meteo responded ${response.status}: ${await response.text()}`);
 }
