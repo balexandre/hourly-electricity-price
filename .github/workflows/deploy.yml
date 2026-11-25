@@ -41,7 +41,7 @@ jobs:
       # The morning run only touches the car; everything else is a prices run
       TASK: ${{ github.event.schedule == '0 5,7 * * *' && 'car' || inputs.task || 'prices' }}
     outputs:
-      site_changed: ${{ steps.commit.outputs.site_changed }}
+      site_outdated: ${{ steps.site.outputs.outdated }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -122,29 +122,45 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
-          # Only what the page shows needs a redeploy: prices (and the charging plan in them) or the wind forecast.
-          # A sent-log update alone doesn't change the site.
-          if ! git diff --cached --quiet -- data/prices.json data/wind.json; then
-            echo "site_changed=true" >> "$GITHUB_OUTPUT"
-          fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m "Update data"
           git pull --rebase
           git push
 
+      # Compares what the site serves with data/ rather than asking whether this run changed anything, so a deploy
+      # that failed is caught up by the next run. Before, the later tries found no new prices and skipped deploying,
+      # and the site went without tomorrow's prices until the data next changed.
+      # Only the files the page reads matter: prices (with the car's charging plan) and the wind forecast.
+      - name: Check the site is up to date
+        id: site
+        if: ${{ !cancelled() }}
+        env:
+          SITE_URL: https://balexandre.github.io/hourly-electricity-price/
+        run: |
+          for file in data/prices.json data/wind.json; do
+            # The query string gets past the CDN's cached copy; a download that fails counts as out of date
+            if ! curl -fsS --max-time 20 -o "$RUNNER_TEMP/served" "$SITE_URL$file?run=$GITHUB_RUN_ID" ||
+               ! cmp -s "$RUNNER_TEMP/served" "$file"; then
+              echo "The site's $file isn't the latest, deploying."
+              echo "outdated=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "The site is up to date."
+
   # Pushes made with GITHUB_TOKEN don't trigger other workflows, so deploy from here.
-  # A push deploys the new code; the timed runs (scheduled or from cron-job.org) only when there are new prices or wind.
+  # A push deploys the new code; the timed runs (scheduled or from cron-job.org) only when the site's data is behind.
   deploy:
     needs: update
-    if: ${{ !cancelled() && (github.event_name == 'push' || needs.update.outputs.site_changed == 'true') }}
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.update.outputs.site_outdated == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       pages: write
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.retry.outputs.page_url }}
     steps:
       # Branch ref (not the triggering SHA) so the data commit made above is included
       - name: Checkout
@@ -157,6 +173,19 @@ jobs:
         with:
           path: '.'
 
+      # Right after the upload, GitHub sometimes doesn't list the artifact yet and the deploy fails with
+      # 'No artifacts named "github-pages" were found'. It shows up seconds later, so wait and deploy again.
+      # Not by re-running the job: that uploads a second artifact and fails on finding two.
       - name: Deploy to GitHub Pages
         id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Wait for the artifact
+        if: ${{ steps.deployment.outcome == 'failure' }}
+        run: sleep 30
+
+      - name: Deploy to GitHub Pages (second try)
+        id: retry
+        if: ${{ steps.deployment.outcome == 'failure' }}
         uses: actions/deploy-pages@v4
