@@ -36,17 +36,19 @@ Prices run, tried at 13:15, 13:45, 14:15 and 14:45; tomorrow's prices come out a
    ├─► 3. scripts/notify.mjs         hands ntfy all of tomorrow's notifications, each with its delivery time
    │                                 (remembers what it queued in data/notified.json)
    ├─► 4. commits data/ back to the repo (only when something changed)
-   └─► 5. deploys the site to GitHub Pages (when the prices or the wind changed)
+   └─► 5. deploys the site to GitHub Pages (when the site's prices or wind aren't the latest)
 
 Car run at 07:00 with a second try at 09:00
    │
    ├─► scripts/fetch-wind.mjs        refreshes the wind forecast for the morning
    ├─► scripts/tesla-charge.mjs      switches the afternoon charging back off
    ├─► commits data/charge.json and data/wind.json
-   └─► deploys the site when the wind changed
+   └─► deploys the site when its wind (or prices) aren't the latest
 ```
 
 cron-job.org is there because GitHub often starts scheduled runs hours late or skips them. The backup schedule is in UTC, so it runs an hour earlier in winter. Each job has a few tries: the first one that finds something to do does it, and the rest change nothing. Notifications don't depend on when a run starts: [ntfy holds each message](https://docs.ntfy.sh/publish/#scheduled-delivery) and delivers it at its time. Only tomorrow's overview can be late, if no prices run gets through before 15:00.
+
+Deploys check the site rather than the run: each run compares the `data/prices.json` and `data/wind.json` the site serves with the repo's, and deploys when they differ. So if a deploy fails, the next try catches up instead of finding nothing new and leaving the site without tomorrow's prices. A deploy that fails because GitHub doesn't list the just-uploaded site yet is tried again 30 seconds later in the same run.
 
 The web page only reads `data/prices.json` and `data/wind.json`; it never calls the APIs itself.
 
